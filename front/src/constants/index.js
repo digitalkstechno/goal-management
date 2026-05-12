@@ -1,4 +1,4 @@
-export const ROLES = { ADMIN: 'admin', USER: 'user' };
+export const ROLES = { ADMIN: 'admin', MANAGER: 'manager', USER: 'user' };
 export const GOAL_STATUS = {
   NOT_STARTED: 'not_started',
   IN_PROGRESS: 'in_progress',

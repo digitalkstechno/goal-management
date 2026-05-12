@@ -40,19 +40,18 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-userSchema.pre("save", async function hashPassword(next) {
+userSchema.pre("save", async function hashPassword() {
   if (!this.isModified("password")) {
-    return next();
+    return;
   }
   this.password = await bcrypt.hash(this.password, 12);
-  return next();
 });
 
 userSchema.pre("save", function syncPermissions(next) {
   if (this.isModified("role")) {
     this.permissions = getPermissionsByRole(this.role);
   }
-  return next();
+  next();
 });
 
 userSchema.methods.comparePassword = function comparePassword(candidatePassword) {
