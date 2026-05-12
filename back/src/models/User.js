@@ -47,11 +47,10 @@ userSchema.pre("save", async function hashPassword() {
   this.password = await bcrypt.hash(this.password, 12);
 });
 
-userSchema.pre("save", function syncPermissions(next) {
+userSchema.pre("save", function syncPermissions() {
   if (this.isModified("role")) {
     this.permissions = getPermissionsByRole(this.role);
   }
-  next();
 });
 
 userSchema.methods.comparePassword = function comparePassword(candidatePassword) {
