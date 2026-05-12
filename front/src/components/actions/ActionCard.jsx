@@ -60,7 +60,7 @@ export default function ActionCard({ action, restrictUser, currentUserId }) {
             <PriorityBadge priority={action.priority} />
           </div>
           <p className="mt-1 text-[13px] text-[var(--color-text-muted)]">
-            Owner: <span className="text-[var(--color-text)]">{userDisplayName(action.ownerId)}</span>
+            Owner: <span className="text-[var(--color-text)]">{userDisplayName(action.ownerId, state.users)}</span>
           </p>
           {action.description ? (
             <p className="mt-1 text-sm text-[var(--color-text-muted)]">{action.description}</p>

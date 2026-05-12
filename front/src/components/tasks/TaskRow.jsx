@@ -31,6 +31,7 @@ function TaskRowInner({
   dragListeners,
   isDragging,
 }) {
+  const { state } = useAppContext();
   const { completeTask, removeTask, reorderTasks, editTask } = useTasks(actionId);
   const { isAdmin, currentUser } = useAuth();
   const [notesOpen, setNotesOpen] = useState(false);
@@ -95,7 +96,7 @@ function TaskRowInner({
                     }
                   })()
                 : '—'}{' '}
-              • Responsible: {userDisplayName(task.assignedUserId)}
+              • Responsible: {userDisplayName(task.assignedUserId, state.users)}
             </span>
             <PriorityBadge priority={task.priority} />
           </div>

@@ -36,8 +36,16 @@ const authorizeRoles = (...allowedRoles) => (req, _res, next) => {
   next();
 };
 
+const { getPermissionsByRole } = require("../utils/roles");
+
 const requirePermissions = (...requiredPermissions) => (req, _res, next) => {
-  const userPermissions = req.user?.permissions || [];
+  // Use permissions from user object, or fallback to role-based defaults
+  let userPermissions = req.user?.permissions;
+  
+  if (!userPermissions || userPermissions.length === 0) {
+    userPermissions = getPermissionsByRole(req.user?.role);
+  }
+
   const hasPermission = requiredPermissions.every((permission) =>
     userPermissions.includes(permission)
   );

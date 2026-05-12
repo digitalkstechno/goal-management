@@ -2,15 +2,12 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../hooks/useAuth';
 
-const INITIAL_LOGIN = { email: 'ravichovatiya@gmail.com', password: 'Ravi@123' };
-const INITIAL_REGISTER = { name: 'ravi chovatiya', email: 'ravichovatiya@gmail.com', password: 'Ravi@123' };
-
 export default function AuthScreen() {
   const { login, register } = useAuth();
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [loginForm, setLoginForm] = useState(INITIAL_LOGIN);
-  const [registerForm, setRegisterForm] = useState(INITIAL_REGISTER);
+  const [loginForm, setLoginForm] = useState({ email: '', password: '' });
+  const [registerForm, setRegisterForm] = useState({ name: '', email: '', password: '' });
 
   const handleLogin = async (event) => {
     event.preventDefault();

@@ -73,7 +73,7 @@ export default function GoalPanel({ goal }) {
           </p>
           <p className="mt-1.5 text-[13px] text-[var(--color-text-muted)]">
             Owner:{' '}
-            <span className="text-[var(--color-text)]">{userDisplayName(goal.ownerId)}</span>
+            <span className="text-[var(--color-text)]">{userDisplayName(goal.ownerId, state.users)}</span>
           </p>
           {goal.description ? (
             <p className="mt-2 max-w-3xl text-sm text-[var(--color-text-muted)]">{goal.description}</p>

@@ -7,6 +7,9 @@ const rateLimit = require("express-rate-limit");
 const env = require("./config/env");
 const buildAuthRoutes = require("./routes/authRoutes");
 const buildUserRoutes = require("./routes/userRoutes");
+const buildGoalRoutes = require("./routes/goalRoutes");
+const buildActionRoutes = require("./routes/actionRoutes");
+const buildTaskRoutes = require("./routes/taskRoutes");
 const { errorHandler, notFound } = require("./middlewares/errorMiddleware");
 
 const app = express();
@@ -40,8 +43,14 @@ app.get("/health", (_req, res) => {
   });
 });
 
-app.use("/api/v1/auth", buildAuthRoutes(env));
-app.use("/api/v1/users", buildUserRoutes(env));
+const v1Router = express.Router();
+v1Router.use("/auth", buildAuthRoutes(env));
+v1Router.use("/users", buildUserRoutes(env));
+v1Router.use("/goals", buildGoalRoutes(env));
+v1Router.use("/actions", buildActionRoutes(env));
+v1Router.use("/tasks", buildTaskRoutes(env));
+
+app.use("/api/v1", v1Router);
 
 app.use(notFound);
 app.use(errorHandler);

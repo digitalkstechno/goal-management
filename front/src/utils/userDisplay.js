@@ -1,7 +1,9 @@
-import { MOCK_USERS } from '../mock/users.mock';
-
-/** Resolves mock user id to display name; falls back to raw id. */
-export function userDisplayName(id) {
+/** Resolves user id to display name; falls back to raw id. */
+export function userDisplayName(id, users = []) {
   if (!id) return '—';
-  return MOCK_USERS.find((u) => u.id === id)?.name || id;
+  // If id is an object (populated), return its name
+  if (typeof id === 'object' && id.name) return id.name;
+  
+  const user = users.find((u) => u.id === id || u._id === id);
+  return user?.name || id;
 }

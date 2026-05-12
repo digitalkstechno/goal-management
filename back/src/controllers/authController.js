@@ -6,7 +6,7 @@ const { ROLES, getPermissionsByRole } = require("../utils/roles");
 
 const register = (env) =>
   asyncHandler(async (req, res) => {
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
       throw new ApiError(400, "Name, email and password are required.");
@@ -17,16 +17,13 @@ const register = (env) =>
       throw new ApiError(409, "Email already registered.");
     }
 
-    const normalizedRole = Object.values(ROLES).includes(role)
-      ? role
-      : ROLES.USER;
-
+    // Always create new users with USER role (cannot register as admin)
     const user = await User.create({
       name,
       email,
       password,
-      role: normalizedRole,
-      permissions: getPermissionsByRole(normalizedRole),
+      role: ROLES.USER,
+      permissions: getPermissionsByRole(ROLES.USER),
     });
 
     const token = generateToken(user._id, env.jwtSecret, env.jwtExpiresIn);
