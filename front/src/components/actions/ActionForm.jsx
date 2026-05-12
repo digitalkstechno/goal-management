@@ -34,8 +34,8 @@ export default function ActionForm({ open, onClose, goalId, initialAction, onCre
         description: initialAction.description || '',
         startDate: initialAction.startDate || '',
         deadline: initialAction.deadline || '',
-        ownerId: initialAction.ownerId || '',
-        assignedUserIds: initialAction.assignedUserIds || [],
+        ownerId: initialAction.ownerId?.id || initialAction.ownerId || '',
+        assignedUserIds: (initialAction.assignedUserIds || []).map((u) => u.id || u),
         priority: initialAction.priority || PRIORITY.MEDIUM,
         status: initialAction.status || ACTION_STATUS.PENDING,
       });
@@ -47,7 +47,9 @@ export default function ActionForm({ open, onClose, goalId, initialAction, onCre
   const errors = useMemo(() => {
     const e = {};
     if (!form.name.trim()) e.name = true;
+    if (!form.startDate) e.startDate = true;
     if (!form.deadline) e.deadline = true;
+    if (!form.ownerId) e.ownerId = true;
     return e;
   }, [form]);
 
@@ -72,13 +74,13 @@ export default function ActionForm({ open, onClose, goalId, initialAction, onCre
 
   const submit = () => {
     setAttempted(true);
-    if (!form.name.trim() || !form.deadline) return;
+    if (!form.name.trim() || !form.startDate || !form.deadline || !form.ownerId) return;
     const payload = {
       name: form.name.trim(),
       description: form.description.trim(),
-      startDate: form.startDate || null,
+      startDate: form.startDate,
       deadline: form.deadline,
-      ownerId: form.ownerId,
+      ownerId: form.ownerId || null,
       assignedUserIds: form.assignedUserIds,
       priority: form.priority,
       status: form.status,
@@ -132,10 +134,10 @@ export default function ActionForm({ open, onClose, goalId, initialAction, onCre
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <label className="text-sm font-medium text-[var(--color-text)]">Start date</label>
+            <label className="text-sm font-medium text-[var(--color-text)]">Start date *</label>
             <input
               type="date"
-              className={fieldClass()}
+              className={fieldClass('startDate')}
               value={form.startDate}
               onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))}
             />
@@ -151,9 +153,9 @@ export default function ActionForm({ open, onClose, goalId, initialAction, onCre
           </div>
         </div>
         <div>
-          <label className="text-sm font-medium text-[var(--color-text)]">Owner</label>
+          <label className="text-sm font-medium text-[var(--color-text)]">Owner *</label>
           <select
-            className={fieldClass()}
+            className={fieldClass('ownerId')}
             value={form.ownerId}
             onChange={(e) => setForm((f) => ({ ...f, ownerId: e.target.value }))}
           >

@@ -11,6 +11,7 @@ import {
   Pencil,
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
+import { useAppContext } from '../../context/AppContext';
 import { useTasks } from '../../hooks/useTasks';
 import { useAuth } from '../../hooks/useAuth';
 import { TASK_STATUS } from '../../constants';
@@ -38,8 +39,9 @@ function TaskRowInner({
   const [formOpen, setFormOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const canDelete = isAdmin || task.assignedUserId === currentUser.id;
-  const canNotes = isAdmin || task.assignedUserId === currentUser.id;
+  const assignedId = task.assignedUserId?.id || task.assignedUserId;
+  const canDelete = isAdmin || assignedId === currentUser.id;
+  const canNotes = isAdmin || assignedId === currentUser.id;
 
   const move = (dir) => {
     if (!enableSort) return;

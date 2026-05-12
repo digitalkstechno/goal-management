@@ -13,9 +13,12 @@ export default function ActionList({ goalId, restrictUser, currentUserId, hideAd
 
   const visible = useMemo(() => {
     if (!restrictUser) return actions;
-    return actions.filter(
-      (a) => a.ownerId === currentUserId || (a.assignedUserIds || []).includes(currentUserId)
-    );
+    return actions.filter((a) => {
+      const oid = a.ownerId?.id || a.ownerId;
+      if (oid === currentUserId) return true;
+      const assignedIds = (a.assignedUserIds || []).map((u) => u.id || u);
+      return assignedIds.includes(currentUserId);
+    });
   }, [actions, restrictUser, currentUserId]);
 
   return (

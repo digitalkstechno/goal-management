@@ -6,7 +6,10 @@ export function useActions(goalId) {
   const { state, addAction, editAction, removeAction } = useAppContext();
 
   const actions = useMemo(() => {
-    const list = state.actions.filter((a) => !goalId || a.goalId === goalId);
+    const list = state.actions.filter((a) => {
+      const gid = a.goalId?.id || a.goalId;
+      return !goalId || gid === goalId;
+    });
     return [...list].sort((a, b) => {
       if (!a.deadline) return 1;
       if (!b.deadline) return -1;

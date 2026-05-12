@@ -35,7 +35,7 @@ export default function TaskForm({ open, onClose, actionId, initialTask, onCreat
         description: initialTask.description || '',
         startDate: initialTask.startDate || '',
         deadline: initialTask.deadline || '',
-        assignedUserId: initialTask.assignedUserId || '',
+        assignedUserId: initialTask.assignedUserId?.id || initialTask.assignedUserId || '',
         assignedTeam: initialTask.assignedTeam || '',
         priority: initialTask.priority || PRIORITY.MEDIUM,
         status: initialTask.status || TASK_STATUS.TODO,
@@ -49,6 +49,7 @@ export default function TaskForm({ open, onClose, actionId, initialTask, onCreat
   const errors = useMemo(() => {
     const e = {};
     if (!form.name.trim()) e.name = true;
+    if (!form.startDate) e.startDate = true;
     if (!form.deadline) e.deadline = true;
     return e;
   }, [form]);
@@ -65,13 +66,13 @@ export default function TaskForm({ open, onClose, actionId, initialTask, onCreat
 
   const submit = () => {
     setAttempted(true);
-    if (!form.name.trim() || !form.deadline) return;
+    if (!form.name.trim() || !form.startDate || !form.deadline) return;
     const payload = {
       name: form.name.trim(),
       description: form.description.trim(),
-      startDate: form.startDate || null,
+      startDate: form.startDate,
       deadline: form.deadline,
-      assignedUserId: form.assignedUserId,
+      assignedUserId: form.assignedUserId || null,
       assignedTeam: form.assignedTeam.trim(),
       priority: form.priority,
       status: form.status,
@@ -127,10 +128,10 @@ export default function TaskForm({ open, onClose, actionId, initialTask, onCreat
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <label className="text-sm font-medium text-[var(--color-text)]">Start date</label>
+            <label className="text-sm font-medium text-[var(--color-text)]">Start date *</label>
             <input
               type="date"
-              className={fieldClass()}
+              className={fieldClass('startDate')}
               value={form.startDate}
               onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))}
             />

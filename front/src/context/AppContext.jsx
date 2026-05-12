@@ -10,6 +10,7 @@ import {
   reorderTasksForAction,
 } from '../api/taskApi';
 import { fetchUsers } from '../api/userApi';
+import { GOAL_STATUS, ACTION_STATUS, TASK_STATUS, PRIORITY } from '../constants';
 
 const AppContext = createContext(null);
 
@@ -73,6 +74,14 @@ function reducer(state, action) {
       };
     case 'DELETE_TASK':
       return { ...state, tasks: state.tasks.filter((t) => t.id !== action.payload) };
+    case 'UPDATE_MANY_TASKS': {
+      const updated = action.payload;
+      const map = new Map(updated.map((t) => [t.id, t]));
+      return {
+        ...state,
+        tasks: state.tasks.map((t) => (map.has(t.id) ? map.get(t.id) : t)),
+      };
+    }
     default:
       return state;
   }
@@ -203,18 +212,26 @@ export function AppProvider({ children }) {
 
   const completeTask = useCallback(
     async (taskId, completed) => {
-      const task = state.tasks.find((t) => t.id === taskId);
-      if (!task) return;
+      const originalTask = state.tasks.find((t) => t.id === taskId);
+      if (!originalTask) return;
       const updatedTask = {
-        ...task,
-        status: completed ? 'completed' : 'todo',
+        status: completed ? TASK_STATUS.COMPLETED : TASK_STATUS.TODO,
         completedAt: completed ? new Date().toISOString() : null,
       };
-      await apiHandler(() => updateTask(taskId, updatedTask), {
+
+      // Optimistic update
+      dispatch({ type: 'UPDATE_TASK', payload: { ...originalTask, ...updatedTask, id: taskId } });
+
+      const { error } = await apiHandler(() => updateTask(taskId, updatedTask), {
         successMsg: completed ? 'Task completed!' : 'Task reopened',
         errorMsg: 'Failed to update task',
         onSuccess: (data) => dispatch({ type: 'UPDATE_TASK', payload: data }),
       });
+
+      // Rollback on error
+      if (error && originalTask) {
+        dispatch({ type: 'UPDATE_TASK', payload: originalTask });
+      }
     },
     [state.tasks]
   );
@@ -223,7 +240,7 @@ export function AppProvider({ children }) {
     await apiHandler(() => reorderTasksForAction(actionId, orderedIds), {
       successMsg: 'Task order saved',
       errorMsg: 'Failed to reorder tasks',
-      onSuccess: (data) => dispatch({ type: 'SET_TASKS', payload: data }),
+      onSuccess: (data) => dispatch({ type: 'UPDATE_MANY_TASKS', payload: data }),
     });
   }, []);
 

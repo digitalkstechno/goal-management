@@ -36,8 +36,8 @@ export default function GoalForm({ open, onClose, initialGoal, onSave }) {
         description: initialGoal.description || '',
         startDate: initialGoal.startDate || '',
         deadline: initialGoal.deadline || '',
-        ownerId: initialGoal.ownerId || '',
-        responsibleId: initialGoal.responsibleId || '',
+        ownerId: initialGoal.ownerId?.id || initialGoal.ownerId || '',
+        responsibleId: initialGoal.responsibleId?.id || initialGoal.responsibleId || '',
         status: initialGoal.status || GOAL_STATUS.IN_PROGRESS,
         priority: initialGoal.priority || PRIORITY.MEDIUM,
       });
@@ -49,7 +49,10 @@ export default function GoalForm({ open, onClose, initialGoal, onSave }) {
   const errors = useMemo(() => {
     const e = {};
     if (!form.name.trim()) e.name = true;
+    if (!form.startDate) e.startDate = true;
     if (!form.deadline) e.deadline = true;
+    if (!form.ownerId) e.ownerId = true;
+    if (!form.responsibleId) e.responsibleId = true;
     return e;
   }, [form]);
 
@@ -67,14 +70,14 @@ export default function GoalForm({ open, onClose, initialGoal, onSave }) {
 
   const submit = () => {
     setAttempted(true);
-    if (!form.name.trim() || !form.deadline) return;
+    if (!form.name.trim() || !form.startDate || !form.deadline || !form.ownerId || !form.responsibleId) return;
     onSave?.({
       name: form.name.trim(),
       description: form.description.trim(),
-      startDate: form.startDate || null,
+      startDate: form.startDate,
       deadline: form.deadline,
-      ownerId: form.ownerId,
-      responsibleId: form.responsibleId,
+      ownerId: form.ownerId || null,
+      responsibleId: form.responsibleId || null,
       status: form.status,
       priority: form.priority,
     });
@@ -125,10 +128,10 @@ export default function GoalForm({ open, onClose, initialGoal, onSave }) {
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <label className="text-sm font-medium text-[var(--color-text)]">Start date</label>
+            <label className="text-sm font-medium text-[var(--color-text)]">Start date *</label>
             <input
               type="date"
-              className={fieldClass()}
+              className={fieldClass('startDate')}
               value={form.startDate}
               onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))}
             />
@@ -145,9 +148,9 @@ export default function GoalForm({ open, onClose, initialGoal, onSave }) {
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <label className="text-sm font-medium text-[var(--color-text)]">Goal owner</label>
+            <label className="text-sm font-medium text-[var(--color-text)]">Goal owner *</label>
             <select
-              className={fieldClass()}
+              className={fieldClass('ownerId')}
               value={form.ownerId}
               onChange={(e) => setForm((f) => ({ ...f, ownerId: e.target.value }))}
             >
@@ -160,9 +163,9 @@ export default function GoalForm({ open, onClose, initialGoal, onSave }) {
             </select>
           </div>
           <div>
-            <label className="text-sm font-medium text-[var(--color-text)]">Responsible</label>
+            <label className="text-sm font-medium text-[var(--color-text)]">Responsible *</label>
             <select
-              className={fieldClass()}
+              className={fieldClass('responsibleId')}
               value={form.responsibleId}
               onChange={(e) => setForm((f) => ({ ...f, responsibleId: e.target.value }))}
             >

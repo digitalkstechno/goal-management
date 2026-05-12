@@ -28,10 +28,13 @@ export default function ActionCard({ action, restrictUser, currentUserId }) {
   const overdue =
     getDeadlineStatus(action.deadline) === DEADLINE_STATUS.OVERDUE && progress < 100;
 
-  const canAddTask =
-    isAdmin ||
-    action.ownerId === currentUser.id ||
-    (action.assignedUserIds || []).includes(currentUser.id);
+  const canAddTask = useMemo(() => {
+    if (isAdmin) return true;
+    const oid = action.ownerId?.id || action.ownerId;
+    if (oid === currentUser.id) return true;
+    const assignedIds = (action.assignedUserIds || []).map((u) => u.id || u);
+    return assignedIds.includes(currentUser.id);
+  }, [isAdmin, action, currentUser.id]);
 
   const deadlineLabel = action.deadline
     ? (() => {

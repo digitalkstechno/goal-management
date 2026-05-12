@@ -61,9 +61,11 @@ export function sortGoalsList(goals, actions, tasks, sort) {
 }
 
 export function filterGoalsForUser(goals, currentUser) {
-  return goals.filter(
-    (g) => g.responsibleId === currentUser.id || g.ownerId === currentUser.id
-  );
+  return goals.filter((g) => {
+    const rid = g.responsibleId?.id || g.responsibleId;
+    const oid = g.ownerId?.id || g.ownerId;
+    return rid === currentUser.id || oid === currentUser.id;
+  });
 }
 
 export function useGoals(scopeGoals) {
