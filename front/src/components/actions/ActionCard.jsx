@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ChevronDown, ChevronUp, Pencil, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Pencil, Trash2, Calendar, User, MoreVertical, ListTodo } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { useAppContext } from '../../context/AppContext';
 import { useAuth } from '../../hooks/useAuth';
@@ -39,53 +39,85 @@ export default function ActionCard({ action, restrictUser, currentUserId }) {
   const deadlineLabel = action.deadline
     ? (() => {
         try {
-          return format(parseISO(action.deadline), 'yyyy-MM-dd');
+          return format(parseISO(action.deadline), 'MMM dd, yyyy');
         } catch {
           return action.deadline;
         }
       })()
-    : '—';
+    : 'No deadline';
 
   return (
     <div
-      className={`mb-2.5 rounded-lg border border-[#eef2ff] bg-[var(--color-card)] p-2.5 last:mb-0 ${
-        overdue ? 'border-l-4 border-l-[var(--color-danger)] border-[#eef2ff]' : ''
+      className={`group mb-4 rounded-xl border border-[var(--color-border)] bg-white transition-all hover:shadow-md ${
+        overdue ? 'border-l-4 border-l-rose-500' : ''
       }`}
     >
-      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <strong className="text-[var(--color-text)]">{action.name}</strong>
-            <small className="text-[13px] text-[var(--color-text-muted)]">(by {deadlineLabel})</small>
-            <div className="ml-2 rounded-pill bg-[#eef2ff] px-2 py-0.5 text-xs font-semibold text-[var(--color-primary)]">
-              {progress}%
+      <div className="p-4">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <PriorityBadge priority={action.priority} />
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 text-[10px] font-bold text-slate-600 uppercase tracking-wider">
+                <Calendar className="h-3 w-3" />
+                {deadlineLabel}
+              </div>
+              {overdue && (
+                <span className="px-2 py-0.5 rounded-full bg-rose-50 text-[10px] font-bold text-rose-600 uppercase tracking-wider">
+                  Overdue
+                </span>
+              )}
             </div>
-            <PriorityBadge priority={action.priority} />
+
+            <h4 className="text-base font-bold text-[var(--color-text)] mb-1 group-hover:text-[var(--color-primary)] transition-colors">
+              {action.name}
+            </h4>
+
+            {action.description && (
+              <p className="text-sm text-[var(--color-text-muted)] mb-3 leading-relaxed line-clamp-2">
+                {action.description}
+              </p>
+            )}
+
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1.5">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-50 text-[var(--color-primary)]">
+                  <User className="h-3 w-3" />
+                </div>
+                <span className="text-xs font-medium text-[var(--color-text-muted)]">
+                  {userDisplayName(action.ownerId, state.users)}
+                </span>
+              </div>
+              
+              <div className="flex-1 max-w-[200px] flex items-center gap-3">
+                <ProgressBar value={progress} size="xs" gradient />
+                <span className="text-xs font-bold text-[var(--color-primary)]">{progress}%</span>
+              </div>
+            </div>
           </div>
-          <p className="mt-1 text-[13px] text-[var(--color-text-muted)]">
-            Owner: <span className="text-[var(--color-text)]">{userDisplayName(action.ownerId, state.users)}</span>
-          </p>
-          {action.description ? (
-            <p className="mt-1 text-sm text-[var(--color-text-muted)]">{action.description}</p>
-          ) : null}
-          <div className="mt-2 max-w-[320px]">
-            <ProgressBar value={progress} size="sm" gradient />
-          </div>
-        </div>
-        <div className="flex shrink-0 flex-col gap-1 text-left md:text-right">
-          <p className="text-[13px] text-[var(--color-text-muted)]">
-            Tasks:{' '}
-            <span className="font-medium text-[var(--color-text)]">
-              {state.tasks.filter((t) => t.actionId === action.id).length}
-            </span>
-          </p>
-          <div className="flex flex-wrap items-center gap-2 md:justify-end">
-            {isAdmin ? (
-              <>
+
+          <div className="flex flex-wrap items-center gap-2 md:flex-col md:items-end">
+            <div className="flex items-center gap-3 mb-1">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
+                <ListTodo className="h-3.5 w-3.5" />
+                {state.tasks.filter((t) => t.actionId === action.id).length} Tasks
+              </div>
+              <button
+                type="button"
+                onClick={() => setExpanded((v) => !v)}
+                className={`flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--color-border)] transition-all ${
+                  expanded ? 'bg-indigo-50 text-[var(--color-primary)] border-[var(--color-primary)]' : 'bg-white text-slate-400 hover:text-slate-600'
+                }`}
+              >
+                {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </button>
+            </div>
+
+            {isAdmin && (
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setFormOpen(true)}
-                  className="inline-flex items-center gap-1 rounded-lg border border-[rgba(37,99,235,0.12)] bg-transparent px-2 py-1 text-xs font-semibold text-[var(--color-primary)] hover:bg-[var(--color-primary-light)]"
+                  className="flex h-8 items-center gap-1.5 px-2.5 rounded-lg border border-[var(--color-border)] bg-white text-xs font-bold text-slate-600 transition-all hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
                 >
                   <Pencil className="h-3.5 w-3.5" />
                   Edit
@@ -93,27 +125,18 @@ export default function ActionCard({ action, restrictUser, currentUserId }) {
                 <button
                   type="button"
                   onClick={() => setConfirmOpen(true)}
-                  className="inline-flex items-center gap-1 rounded-lg border border-[var(--color-danger)]/30 bg-[var(--color-danger-light)] px-2 py-1 text-xs font-semibold text-[var(--color-danger)]"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-rose-100 bg-rose-50 text-rose-500 transition-all hover:bg-rose-100 hover:text-rose-600"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
-                  Delete
                 </button>
-              </>
-            ) : null}
-            <button
-              type="button"
-              onClick={() => setExpanded((v) => !v)}
-              className="inline-flex items-center gap-1 rounded-lg border border-[rgba(37,99,235,0.12)] bg-transparent px-2 py-1 text-xs font-semibold text-[var(--color-primary)] hover:bg-[var(--color-primary-light)]"
-            >
-              {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              Tasks
-            </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {expanded ? (
-        <div className="mt-2.5 border-t border-[#eef2ff] pt-2.5 pl-2.5">
+      {expanded && (
+        <div className="border-t border-[var(--color-border)] bg-slate-50/50 p-4 rounded-b-xl">
           <TaskList
             actionId={action.id}
             showAddButton={canAddTask}
@@ -121,7 +144,7 @@ export default function ActionCard({ action, restrictUser, currentUserId }) {
             currentUserId={currentUserId}
           />
         </div>
-      ) : null}
+      )}
 
       <ActionForm
         open={formOpen}
@@ -133,11 +156,12 @@ export default function ActionCard({ action, restrictUser, currentUserId }) {
 
       <ConfirmDialog
         open={confirmOpen}
-        title="Delete action"
-        message="This will remove the action and its tasks."
+        title="Delete Action"
+        message="Are you sure you want to delete this action? This will also remove all associated tasks."
         onClose={() => setConfirmOpen(false)}
         onConfirm={() => removeAction(action.id)}
       />
     </div>
   );
 }
+

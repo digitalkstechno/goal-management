@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, FolderOpen, Layers } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { calcGoalProgress } from '../../utils/progressCalculator';
 import { getDeadlineStatus } from '../../utils/deadlineUtils';
@@ -7,10 +7,10 @@ import { DEADLINE_STATUS } from '../../constants';
 import GoalList from '../goals/GoalList';
 
 const TABS = [
-  { id: 'all', label: 'All' },
+  { id: 'all', label: 'All Goals' },
   { id: 'active', label: 'Active' },
   { id: 'overdue', label: 'Overdue' },
-  { id: 'completed', label: 'Completed' },
+  { id: 'completed', label: 'Done' },
 ];
 
 function matchesTab(goal, tab, actions, tasks) {
@@ -46,36 +46,60 @@ export default function Sidebar({ goals, selectedGoalId, onSelectGoal }) {
   }, [goals, q, tab, state.actions, state.tasks]);
 
   return (
-    <div className="flex h-full min-h-0 flex-col min-[900px]:max-h-[calc(100vh-8rem)]">
-      <h3 className="m-0 text-base font-semibold text-[var(--color-text)]">My Goals</h3>
-      <div className="relative mt-3">
-        <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-[var(--color-text-light)]" />
+    <div className="flex h-full min-h-0 flex-col min-[900px]:max-h-[calc(100vh-10rem)]">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Layers className="h-5 w-5 text-[var(--color-primary)]" />
+          <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--color-text)]">
+            Workspace
+          </h3>
+        </div>
+        <span className="rounded-lg bg-[var(--color-primary-light)] px-2 py-0.5 text-[10px] font-bold text-[var(--color-primary)]">
+          {goals.length} Goals
+        </span>
+      </div>
+
+      <div className="relative group mb-5">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--color-text-light)] transition-colors group-focus-within:text-[var(--color-primary)]" />
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search goals..."
-          className="w-full rounded-md border border-[#e6edf3] bg-[var(--color-bg)] py-2 pl-9 pr-3 text-sm outline-none focus:border-[var(--color-primary)]"
+          placeholder="Quick search..."
+          className="w-full rounded-xl border border-[var(--color-border)] bg-white py-2.5 pl-10 pr-4 text-sm transition-all focus:border-[var(--color-primary)] focus:ring-4 focus:ring-indigo-50 outline-none"
         />
       </div>
-      <div className="mt-2 flex flex-wrap gap-2">
+
+      <div className="mb-4 flex flex-wrap gap-1.5 border-b border-[var(--color-border)] pb-2">
         {TABS.map((t) => (
           <button
             key={t.id}
             type="button"
             onClick={() => setTab(t.id)}
-            className={`whitespace-nowrap rounded-pill px-3 py-1 text-xs font-semibold transition-colors ${
+            className={`relative px-3 py-1.5 text-xs font-bold transition-all ${
               tab === t.id
-                ? 'bg-[var(--color-primary)] text-white'
-                : 'bg-[var(--color-bg)] text-[var(--color-text-muted)] hover:bg-[var(--color-primary-light)]'
+                ? 'text-[var(--color-primary)]'
+                : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
             }`}
           >
             {t.label}
+            {tab === t.id && (
+              <span className="absolute bottom-[-9px] left-0 h-0.5 w-full bg-[var(--color-primary)]" />
+            )}
           </button>
         ))}
       </div>
-      <div className="mt-3 min-h-0 flex-1 overflow-y-auto">
-        <GoalList goals={visible} selectedGoalId={selectedGoalId} onSelect={onSelectGoal} />
+
+      <div className="min-h-0 flex-1 overflow-y-auto pr-1 scrollbar-thin">
+        {visible.length > 0 ? (
+          <GoalList goals={visible} selectedGoalId={selectedGoalId} onSelect={onSelectGoal} />
+        ) : (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <FolderOpen className="h-10 w-10 text-[var(--color-text-light)] opacity-20 mb-3" />
+            <p className="text-sm text-[var(--color-text-muted)]">No goals found</p>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+

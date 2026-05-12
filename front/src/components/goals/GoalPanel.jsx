@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, Plus, Calendar, User, Info, CheckCircle, ListTodo, Target } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { useAppContext } from '../../context/AppContext';
 import { useAuth } from '../../hooks/useAuth';
@@ -14,9 +14,9 @@ import ProgressBar from '../common/ProgressBar';
 import GoalBadge from './GoalBadge';
 
 function formatDeadline(deadline) {
-  if (!deadline) return '—';
+  if (!deadline) return 'No deadline set';
   try {
-    return format(parseISO(deadline), 'yyyy-MM-dd');
+    return format(parseISO(deadline), 'MMMM dd, yyyy');
   } catch {
     return deadline;
   }
@@ -47,88 +47,131 @@ export default function GoalPanel({ goal }) {
 
   if (!goal) {
     return (
-      <div className="flex min-h-[400px] flex-col items-center justify-center rounded-[10px] bg-[var(--color-card)] p-8 text-center shadow-card">
-        <div className="text-[40px] leading-none">🎯</div>
-        <div className="mt-2.5 font-semibold text-[var(--color-text)]">No goal selected</div>
-        <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-          Select a goal from the left or add a goal to get started.
+      <div className="flex min-h-[500px] flex-col items-center justify-center rounded-2xl bg-white p-12 text-center shadow-sm border border-dashed border-[var(--color-border)] animate-fade-in">
+        <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-indigo-50 text-[var(--color-primary)] mb-6">
+          <Target className="h-10 w-10" />
+        </div>
+        <h3 className="text-xl font-bold text-[var(--color-text)] mb-2">No Goal Selected</h3>
+        <p className="max-w-xs text-[var(--color-text-muted)] leading-relaxed">
+          Select a goal from your workspace to view detailed progress and manage actions.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-[400px] rounded-[10px] bg-[var(--color-card)] p-3.5 shadow-card">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <div className="min-h-[500px] rounded-2xl bg-white p-6 shadow-sm border border-[var(--color-border)] animate-fade-in">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between border-b border-[var(--color-border)] pb-8">
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2.5">
-            <h2 className="m-0 text-xl font-semibold text-[var(--color-text)]">{goal.name}</h2>
-            <div className="rounded-pill bg-[#eef2ff] px-2 py-1 text-xs font-semibold text-[var(--color-primary)]">
-              {progress}%
-            </div>
+          <div className="flex flex-wrap items-center gap-3 mb-4">
             <GoalBadge status={goal.status} priority={goal.priority} />
+            <div className="h-4 w-px bg-[var(--color-border)]"></div>
+            <span className="text-xs font-bold text-[var(--color-primary)] uppercase tracking-wider">
+              {progress}% Complete
+            </span>
           </div>
-          <p className="mt-2 text-[13px] text-[var(--color-text-muted)]">
-            Deadline: {formatDeadline(goal.deadline)}
-          </p>
-          <p className="mt-1.5 text-[13px] text-[var(--color-text-muted)]">
-            Owner:{' '}
-            <span className="text-[var(--color-text)]">{userDisplayName(goal.ownerId, state.users)}</span>
-          </p>
-          {goal.description ? (
-            <p className="mt-2 max-w-3xl text-sm text-[var(--color-text-muted)]">{goal.description}</p>
-          ) : null}
-          <div className="mt-2 w-full max-w-[420px]">
-            <ProgressBar value={progress} size="md" gradient />
+          
+          <h2 className="text-3xl font-extrabold tracking-tight text-[var(--color-text)] mb-4">
+            {goal.name}
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            <div className="flex items-center gap-2.5 text-[var(--color-text-muted)]">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 text-slate-500">
+                <Calendar className="h-4 w-4" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold uppercase tracking-widest leading-none mb-0.5">Deadline</span>
+                <span className="text-sm font-semibold text-[var(--color-text)]">{formatDeadline(goal.deadline)}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2.5 text-[var(--color-text-muted)]">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 text-slate-500">
+                <User className="h-4 w-4" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold uppercase tracking-widest leading-none mb-0.5">Owner</span>
+                <span className="text-sm font-semibold text-[var(--color-text)]">
+                  {userDisplayName(goal.ownerId, state.users)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {goal.description && (
+            <div className="flex gap-3 p-4 rounded-xl bg-slate-50 border border-slate-100 mb-6">
+              <Info className="h-5 w-5 text-slate-400 shrink-0 mt-0.5" />
+              <p className="text-sm text-slate-600 leading-relaxed italic">
+                "{goal.description}"
+              </p>
+            </div>
+          )}
+
+          <div className="w-full max-w-xl">
+            <div className="flex justify-between items-end mb-2">
+              <span className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">Overall Progress</span>
+              <span className="text-sm font-bold text-[var(--color-primary)]">{progress}%</span>
+            </div>
+            <ProgressBar value={progress} size="lg" gradient />
           </div>
         </div>
-        <div className="shrink-0 text-left lg:text-right">
-          <p className="text-[13px] text-[var(--color-text-muted)]">
-            Actions:{' '}
-            <span className="font-medium text-[var(--color-text)]">{goalActions.length}</span>
-          </p>
-          <p className="text-[13px] text-[var(--color-text-muted)]">
-            Completed Actions:{' '}
-            <span className="font-medium text-[var(--color-text)]">{completedActions}</span>
-          </p>
-          {isAdmin ? (
-            <div className="mt-2 flex flex-wrap gap-2 lg:justify-end">
+
+        <div className="shrink-0 flex flex-col gap-4">
+          <div className="flex gap-3 sm:gap-4 lg:flex-col lg:items-end">
+            <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">
+              <CheckCircle className="h-4 w-4 text-emerald-600" />
+              <span className="text-xs font-bold text-emerald-700">
+                {completedActions}/{goalActions.length} Actions Done
+              </span>
+            </div>
+          </div>
+
+          {isAdmin && (
+            <div className="flex flex-wrap gap-2 lg:flex-col">
               <button
                 type="button"
                 onClick={() => setActionFormOpen(true)}
-                className="inline-flex items-center gap-2 rounded-lg bg-[var(--color-primary)] px-3 py-2 text-sm font-semibold text-white hover:bg-[var(--color-primary-hover)]"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-indigo-100 transition-all hover:bg-[var(--color-primary-hover)] hover:-translate-y-0.5 active:translate-y-0"
               >
-                + Add Action
+                <Plus className="h-4 w-4" />
+                Add Action
               </button>
-              <button
-                type="button"
-                onClick={() => setFormOpen(true)}
-                className="inline-flex items-center gap-2 rounded-lg border border-[rgba(37,99,235,0.12)] bg-transparent px-3 py-2 text-sm font-semibold text-[var(--color-primary)] hover:bg-[var(--color-primary-light)]"
-              >
-                <Pencil className="h-4 w-4" />
-                Edit
-              </button>
-              <button
-                type="button"
-                onClick={() => setConfirmOpen(true)}
-                className="inline-flex items-center gap-2 rounded-lg border border-[var(--color-danger)]/30 bg-[var(--color-danger-light)] px-3 py-2 text-sm font-semibold text-[var(--color-danger)] hover:opacity-90"
-              >
-                <Trash2 className="h-4 w-4" />
-                Delete
-              </button>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setFormOpen(true)}
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm font-bold text-[var(--color-text)] transition-all hover:bg-[var(--color-bg)] hover:border-[var(--color-text-light)]"
+                >
+                  <Pencil className="h-4 w-4 text-[var(--color-text-muted)]" />
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmOpen(true)}
+                  className="inline-flex items-center justify-center h-[42px] w-[42px] rounded-xl border border-rose-100 bg-rose-50 text-rose-600 transition-all hover:bg-rose-100 active:scale-95"
+                  title="Delete Goal"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
             </div>
-          ) : null}
+          )}
         </div>
       </div>
 
-      <section className="mt-4">
+      <div className="mt-8">
+        <div className="flex items-center gap-2 mb-6">
+          <ListTodo className="h-5 w-5 text-[var(--color-primary)]" />
+          <h4 className="text-lg font-bold text-[var(--color-text)] tracking-tight">Action Items</h4>
+        </div>
+        
         <ActionList
           goalId={goal.id}
           restrictUser={!isAdmin}
           currentUserId={currentUser.id}
           hideAddButton={isAdmin}
         />
-      </section>
+      </div>
 
       <ActionForm
         open={actionFormOpen}
@@ -146,11 +189,12 @@ export default function GoalPanel({ goal }) {
 
       <ConfirmDialog
         open={confirmOpen}
-        title="Delete goal"
-        message="This will remove the goal and all related actions and tasks."
+        title="Delete Goal"
+        message="Are you sure you want to delete this goal? This action cannot be undone and will remove all associated actions and tasks."
         onClose={() => setConfirmOpen(false)}
         onConfirm={() => removeGoal(goal.id)}
       />
     </div>
   );
 }
+

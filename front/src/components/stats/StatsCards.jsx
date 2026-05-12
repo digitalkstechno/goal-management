@@ -1,13 +1,25 @@
 import { useMemo } from 'react';
+import { Target, Zap, CheckCircle2, AlertCircle } from 'lucide-react';
 import { calcGoalProgress } from '../../utils/progressCalculator';
 import { getDeadlineStatus } from '../../utils/deadlineUtils';
 import { DEADLINE_STATUS } from '../../constants';
 
-function TopCard({ value, label }) {
+function TopCard({ value, label, icon: Icon, colorClass }) {
   return (
-    <div className="min-w-[140px] flex-1 rounded-[10px] bg-[var(--color-card)] p-3.5 shadow-card">
-      <strong className="block text-lg font-semibold text-[var(--color-text)]">{value}</strong>
-      <small className="text-xs text-[var(--color-text-muted)]">{label}</small>
+    <div className="flex-1 min-w-[160px] rounded-2xl bg-white p-5 shadow-sm border border-[var(--color-border)] transition-all hover:shadow-md hover:-translate-y-1">
+      <div className="flex items-start justify-between">
+        <div>
+          <span className="block text-2xl font-bold text-[var(--color-text)] tracking-tight">
+            {value}
+          </span>
+          <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
+            {label}
+          </span>
+        </div>
+        <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${colorClass}`}>
+          <Icon className="h-5 w-5" />
+        </div>
+      </div>
     </div>
   );
 }
@@ -29,11 +41,32 @@ export default function StatsCards({ goals, actions, tasks }) {
   }, [goals, actions, tasks]);
 
   return (
-    <div className="flex w-full flex-wrap gap-3">
-      <TopCard value={metrics.total} label="Total Goals" />
-      <TopCard value={metrics.inProgress} label="In Progress" />
-      <TopCard value={metrics.completed} label="Completed Goals" />
-      <TopCard value={metrics.overdue} label="Overdue Goals" />
+    <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <TopCard 
+        value={metrics.total} 
+        label="Total" 
+        icon={Target} 
+        colorClass="bg-indigo-50 text-[var(--color-primary)]" 
+      />
+      <TopCard 
+        value={metrics.inProgress} 
+        label="Active" 
+        icon={Zap} 
+        colorClass="bg-amber-50 text-amber-600" 
+      />
+      <TopCard 
+        value={metrics.completed} 
+        label="Completed" 
+        icon={CheckCircle2} 
+        colorClass="bg-emerald-50 text-emerald-600" 
+      />
+      <TopCard 
+        value={metrics.overdue} 
+        label="Overdue" 
+        icon={AlertCircle} 
+        colorClass="bg-rose-50 text-rose-600" 
+      />
     </div>
   );
 }
+

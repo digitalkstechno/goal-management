@@ -1,39 +1,61 @@
 :root {
-  /* Brand */
-  --color-primary: #2563eb;
-  --color-primary-light: #eff6ff;
-  --color-primary-hover: #1d4ed8;
+  /* Brand - Modern Indigo / Violet */
+  --color-primary: #6366f1;
+  --color-primary-light: #eef2ff;
+  --color-primary-hover: #4f46e5;
+  --color-accent: #f43f5e; /* Rose for highlights */
+
   /* Semantic */
-  --color-success: #16a34a;
-  --color-success-light: #f0fdf4;
-  --color-warning: #d97706;
+  --color-success: #10b981;
+  --color-success-light: #ecfdf5;
+  --color-warning: #f59e0b;
   --color-warning-light: #fffbeb;
   --color-danger: #ef4444;
   --color-danger-light: #fef2f2;
-  --color-muted: #6b7280;
-  /* Surface */
-  --color-bg: #f6f8fb;
+  --color-info: #0ea5e9;
+  --color-info-light: #f0f9ff;
+
+  /* Surface & Background */
+  --color-bg: #f8fafc;
   --color-card: #ffffff;
-  --color-border: #e5e7eb;
-  --color-border-active: rgba(37, 99, 235, 0.25);
+  --color-card-hover: #fafafa;
+  --color-border: #e2e8f0;
+  --color-border-active: rgba(99, 102, 241, 0.3);
+
   /* Text */
-  --color-text: #111827;
-  --color-text-muted: #6b7280;
-  --color-text-light: #9ca3af;
+  --color-text: #0f172a;
+  --color-text-muted: #64748b;
+  --color-text-light: #94a3b8;
+
   /* Progress track */
-  --color-progress-track: #eef2ff;
+  --color-progress-track: #f1f5f9;
+
   /* Priority */
   --color-priority-high: #ef4444;
   --color-priority-medium: #f59e0b;
-  --color-priority-low: #22c55e;
-  /* Shadows */
-  --shadow-card: 0 6px 18px rgba(20, 24, 40, 0.06);
-  --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.15);
+  --color-priority-low: #10b981;
+
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-blur: 12px;
+
+  /* Shadows - Layered for depth */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
   /* Radii */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
   --radius-pill: 999px;
+
   /* Transitions */
-  --transition: 150ms ease;
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
 }
+
