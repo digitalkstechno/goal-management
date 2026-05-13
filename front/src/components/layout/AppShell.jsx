@@ -58,7 +58,7 @@ export default function AppShell({ sidebar, children, stats }) {
               />
             ) : null}
 
-            <main className="relative z-10 min-w-0">{children}</main>
+            <main className="relative z-10 min-w-0 space-y-5">{children}</main>
           </div>
         </div>
       </div>

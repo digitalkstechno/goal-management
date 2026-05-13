@@ -33,25 +33,31 @@ export default function AdminDashboard() {
           <Sidebar goals={goals} selectedGoalId={selectedGoalId} onSelectGoal={selectGoal} />
         }
       >
-        <div className="mb-5 rounded-[18px] border border-[var(--color-border)] bg-[var(--color-card)] p-4 shadow-card">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-[var(--color-text)]">Workspace</h2>
-              <p className="text-sm text-[var(--color-text-muted)]">
-                Create and manage goals from the workspace panel.
-              </p>
+        <div className="space-y-5">
+          <div className="rounded-[18px] border border-[var(--color-border)] bg-white p-5 shadow-sm">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-[var(--color-text)]">Workspace</h2>
+                <p className="text-sm text-[var(--color-text-muted)]">
+                  Create and manage goals from the workspace panel.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setGoalModalOpen(true)}
+                className="inline-flex items-center justify-center rounded-xl border border-[var(--color-primary)] bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[var(--color-primary-hover)] hover:shadow-lg hover:shadow-indigo-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+              >
+                Create Goal
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setGoalModalOpen(true)}
-              className="inline-flex items-center justify-center rounded-xl border border-[var(--color-primary)] bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[var(--color-primary-hover)] hover:shadow-lg hover:shadow-indigo-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-            >
-              Create Goal
-            </button>
           </div>
+
+          <div className="rounded-[18px] border border-[var(--color-border)] bg-white p-4 shadow-sm">
+            <FilterBar filter={filter} sort={sort} onFilterChange={setFilter} onSortChange={setSort} />
+          </div>
+
+          <GoalPanel goal={selectedGoal} />
         </div>
-        <FilterBar filter={filter} sort={sort} onFilterChange={setFilter} onSortChange={setSort} />
-        <GoalPanel goal={selectedGoal} />
       </AppShell>
       <GoalForm
         open={goalModalOpen}
