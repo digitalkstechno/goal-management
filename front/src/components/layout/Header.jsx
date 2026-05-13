@@ -26,17 +26,6 @@ export default function Header({ onOpenSidebar, onAddGoal }) {
       </div>
 
       <div className="flex flex-shrink-0 items-center gap-3">
-        {isAdmin && onAddGoal && (
-          <button
-            type="button"
-            onClick={onAddGoal}
-            className="group relative inline-flex items-center gap-2 overflow-hidden rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[var(--color-primary-hover)] hover:shadow-lg hover:shadow-indigo-200 active:scale-95"
-          >
-            <Plus className="h-4 w-4 transition-transform group-hover:rotate-90" />
-            <span>Create Goal</span>
-          </button>
-        )}
-
         <div className="h-8 w-px bg-[var(--color-border)] mx-1 hidden sm:block"></div>
 
         <div className="flex items-center gap-3">

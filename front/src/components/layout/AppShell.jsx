@@ -11,7 +11,7 @@ function cloneSidebar(sidebar, onSelect) {
   });
 }
 
-export default function AppShell({ sidebar, children, onAddGoal, stats }) {
+export default function AppShell({ sidebar, children, stats }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const desktopSidebar = cloneSidebar(sidebar, null);
@@ -19,7 +19,7 @@ export default function AppShell({ sidebar, children, onAddGoal, stats }) {
 
   return (
     <div className="flex min-h-screen flex-col bg-[var(--color-bg)]">
-      <Header onOpenSidebar={() => setDrawerOpen(true)} onAddGoal={onAddGoal} />
+      <Header onOpenSidebar={() => setDrawerOpen(true)} />
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-[1100px] px-5 py-7">
           {stats ? <div className="mb-3 flex flex-wrap gap-3">{stats}</div> : null}
