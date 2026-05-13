@@ -68,17 +68,13 @@ const staffSchema = new mongoose.Schema(
 // Unique email per admin (multiple staff can have same email if under different admins)
 staffSchema.index({ email: 1, adminId: 1 }, { unique: true });
 
-// Hash password before saving
-staffSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error);
+// Hash password before saving (async hook: do not use next(); Mongoose 9+ omits it)
+staffSchema.pre("save", async function hashPassword() {
+  if (!this.isModified("password")) {
+    return;
   }
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
 });
 
 // Method to compare passwords

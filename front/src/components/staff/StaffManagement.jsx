@@ -1,300 +1,341 @@
-import React, { useState, useCallback } from "react";
-import staffApi from "../../api/staffApi";
-import StaffList from "./StaffList";
-import StaffForm from "./StaffForm";
-import Modal from "../common/Modal";
-import ConfirmDialog from "../common/ConfirmDialog";
+import { useState, useCallback, useEffect } from 'react';
+import toast from 'react-hot-toast';
+import { Plus, Users, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import staffApi from '../../api/staffApi';
+import StaffList from './StaffList';
+import StaffForm from './StaffForm';
+import Modal from '../common/Modal';
+import ConfirmDialog from '../common/ConfirmDialog';
+import Loader from '../common/Loader';
 
 const staffIdOf = (member) => member?.id ?? member?._id;
 
-const StaffManagement = () => {
+const selectClass =
+  'rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-2 text-sm font-medium text-[var(--color-text)] outline-none transition-colors hover:border-[var(--color-border-active)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20';
+
+export default function StaffManagement() {
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingStaff, setEditingStaff] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState({
     show: false,
     action: null,
     staffId: null,
-    message: "",
+    message: '',
   });
   const [filters, setFilters] = useState({
-    role: "",
-    isActive: "",
+    role: '',
+    isActive: '',
   });
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
     total: 0,
+    pages: 0,
   });
 
-  // Fetch staff list
   const fetchStaff = useCallback(
     async (page = 1) => {
       try {
         setLoading(true);
-        setError("");
+        setError('');
         const params = {
           page,
           limit: pagination.limit,
           ...(filters.role && { role: filters.role }),
-          ...(filters.isActive !== "" && { isActive: filters.isActive }),
+          ...(filters.isActive !== '' && { isActive: filters.isActive }),
         };
         const response = await staffApi.getStaff(params);
         setStaff(response.staff ?? []);
-        setPagination(response.pagination);
+        setPagination((prev) => ({
+          ...prev,
+          ...(response.pagination || {}),
+        }));
       } catch (err) {
-        setError(
-          err.response?.data?.message || err.message || "Failed to load staff"
-        );
+        const msg = err.response?.data?.message || err.message || 'Failed to load staff';
+        setError(msg);
+        toast.error(msg);
         console.error(err);
       } finally {
         setLoading(false);
       }
     },
-    [filters, pagination.limit]
+    [filters.role, filters.isActive, pagination.limit]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchStaff(1);
-  }, [filters]);
+  }, [fetchStaff]);
 
-  // Handle form submission
   const handleFormSubmit = async (formData) => {
     try {
       setLoading(true);
       if (editingStaff) {
         await staffApi.updateStaff(staffIdOf(editingStaff), formData);
-        setError("");
-        alert("Staff updated successfully");
+        setError('');
+        toast.success('Staff member updated');
       } else {
         await staffApi.createStaff(formData);
-        setError("");
-        alert("Staff created successfully");
+        setError('');
+        toast.success('Staff member added');
       }
       setShowForm(false);
       setEditingStaff(null);
       await fetchStaff(pagination.page);
     } catch (err) {
-      setError(err.response?.data?.message || err.message || "Failed to save staff");
+      const msg = err.response?.data?.message || err.message || 'Failed to save staff';
+      setError(msg);
+      toast.error(msg);
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle delete
   const handleDeleteStaff = async () => {
     try {
       setLoading(true);
       await staffApi.deleteStaff(confirmDialog.staffId);
-      setError("");
-      alert("Staff deleted successfully");
-      setConfirmDialog({ show: false, action: null, staffId: null, message: "" });
+      setError('');
+      toast.success('Staff member removed');
       await fetchStaff(pagination.page);
     } catch (err) {
-      setError(err.response?.data?.message || err.message || "Failed to delete staff");
+      const msg = err.response?.data?.message || err.message || 'Failed to delete staff';
+      setError(msg);
+      toast.error(msg);
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle toggle status
   const handleToggleStatus = async () => {
     try {
       setLoading(true);
       await staffApi.toggleStaffStatus(confirmDialog.staffId);
-      setError("");
-      setConfirmDialog({ show: false, action: null, staffId: null, message: "" });
+      setError('');
+      toast.success('Status updated');
       await fetchStaff(pagination.page);
     } catch (err) {
-      setError(err.response?.data?.message || err.message || "Failed to update status");
+      const msg = err.response?.data?.message || err.message || 'Failed to update status';
+      setError(msg);
+      toast.error(msg);
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle edit
   const handleEditStaff = (staffMember) => {
     setEditingStaff(staffMember);
     setShowForm(true);
   };
 
-  // Open delete confirmation
   const handleOpenDeleteConfirm = (staffMember) => {
     setConfirmDialog({
       show: true,
-      action: "delete",
+      action: 'delete',
       staffId: staffIdOf(staffMember),
-      message: `Are you sure you want to delete ${staffMember.name}?`,
+      message: `Remove ${staffMember.name} from your team? This cannot be undone.`,
     });
   };
 
-  // Open status toggle confirmation
   const handleOpenStatusConfirm = (staffMember) => {
     setConfirmDialog({
       show: true,
-      action: "toggleStatus",
+      action: 'toggleStatus',
       staffId: staffIdOf(staffMember),
-      message: `Are you sure you want to ${
-        staffMember.isActive ? "deactivate" : "activate"
-      } ${staffMember.name}?`,
+      message: `${staffMember.isActive ? 'Deactivate' : 'Activate'} ${staffMember.name}?`,
     });
   };
 
-  // Handle close form
   const handleCloseForm = () => {
     setShowForm(false);
     setEditingStaff(null);
   };
 
-  // Handle filter change
   const handleFilterChange = (name, value) => {
-    setFilters((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    setPagination((prev) => ({
-      ...prev,
-      page: 1,
-    }));
+    setFilters((prev) => ({ ...prev, [name]: value }));
+    setPagination((prev) => ({ ...prev, page: 1 }));
   };
 
+  const activeCount = staff.filter((s) => s.isActive).length;
+
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] p-8">
-      {/* Header */}
-      <div className="flex justify-between items-start mb-8 gap-6">
-        <div>
-          <h1 className="text-4xl font-bold text-[var(--color-text)] mb-2">Staff Management</h1>
-          <p className="text-[var(--color-text-muted)]">Manage your team members and assign roles</p>
-        </div>
-        <button
-          onClick={() => setShowForm(true)}
-          disabled={loading}
-          className="whitespace-nowrap bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-hover)] text-white font-semibold px-6 py-3 rounded-lg transition-all hover:shadow-lg hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
-        >
-          + Add Staff Member
-        </button>
-      </div>
-
-      {/* Error Banner */}
-      {error && (
-        <div className="mb-6 p-4 bg-[var(--color-danger-light)] text-[var(--color-danger)] rounded-lg border-l-4 border-[var(--color-danger)]">
-          {error}
-        </div>
-      )}
-
-      {/* Filters */}
-      <div className="flex gap-4 mb-8 flex-wrap">
-        <select
-          value={filters.role}
-          onChange={(e) => handleFilterChange("role", e.target.value)}
-          className="px-4 py-2.5 border border-[var(--color-border)] rounded-lg bg-[var(--color-card)] text-[var(--color-text)] font-medium cursor-pointer transition-all hover:border-[var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-        >
-          <option value="">All Roles</option>
-          <option value="admin">Admin</option>
-          <option value="manager">Manager</option>
-          <option value="staff">Staff</option>
-          <option value="user">User</option>
-        </select>
-
-        <select
-          value={filters.isActive}
-          onChange={(e) => handleFilterChange("isActive", e.target.value)}
-          className="px-4 py-2.5 border border-[var(--color-border)] rounded-lg bg-[var(--color-card)] text-[var(--color-text)] font-medium cursor-pointer transition-all hover:border-[var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-        >
-          <option value="">All Status</option>
-          <option value="true">Active</option>
-          <option value="false">Inactive</option>
-        </select>
-      </div>
-
-      {/* Loading State */}
-      {loading && (
-        <div className="flex items-center justify-center py-16">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
-        </div>
-      )}
-
-      {/* Empty State */}
-      {!loading && staff.length === 0 ? (
-        <div className="text-center py-16 bg-[var(--color-card)] rounded-lg border-2 border-dashed border-[var(--color-border)]">
-          <p className="text-lg text-[var(--color-text-muted)] mb-6">No staff members found</p>
+    <div className="space-y-5 animate-fade-in">
+      <div className="rounded-[18px] border border-[var(--color-border)] bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-primary-light)] text-[var(--color-primary)]">
+              <Users className="h-6 w-6" aria-hidden />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-[var(--color-text)]">Team &amp; access</h2>
+              <p className="mt-1 max-w-xl text-sm text-[var(--color-text-muted)]">
+                Add staff accounts, assign roles, and control who can sign in. Email must be unique
+                per team.
+              </p>
+              {!loading && pagination.total > 0 ? (
+                <p className="mt-2 text-xs font-medium text-[var(--color-text-muted)]">
+                  {pagination.total} member{pagination.total === 1 ? '' : 's'}
+                  {staff.length > 0 ? ` · ${activeCount} active on this page` : ''}
+                </p>
+              ) : null}
+            </div>
+          </div>
           <button
-            onClick={() => setShowForm(true)}
-            className="bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-hover)] text-white font-semibold px-6 py-3 rounded-lg transition-all hover:shadow-lg hover:scale-105"
+            type="button"
+            onClick={() => {
+              setEditingStaff(null);
+              setShowForm(true);
+            }}
+            disabled={loading}
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-[var(--color-primary)] bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[var(--color-primary-hover)] hover:shadow-lg hover:shadow-indigo-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] disabled:pointer-events-none disabled:opacity-50"
           >
-            Add your first staff member
+            <Plus className="h-4 w-4" aria-hidden />
+            Add staff
           </button>
         </div>
-      ) : (
-        <>
-          <StaffList
-            staff={staff}
-            onEdit={handleEditStaff}
-            onDelete={handleOpenDeleteConfirm}
-            onToggleStatus={handleOpenStatusConfirm}
-          />
+      </div>
 
-          {/* Pagination */}
-          {pagination.pages > 1 && (
-            <div className="mt-8 flex items-center justify-center gap-4">
+      {error ? (
+        <div
+          className="rounded-xl border border-[var(--color-danger)]/25 bg-[var(--color-danger-light)] px-4 py-3 text-sm text-[var(--color-danger)]"
+          role="alert"
+        >
+          {error}
+        </div>
+      ) : null}
+
+      <div className="rounded-[18px] border border-[var(--color-border)] bg-white p-4 shadow-sm">
+        <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--color-text)]">
+          <Filter className="h-4 w-4 text-[var(--color-text-muted)]" aria-hidden />
+          Filters
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <select
+            value={filters.role}
+            onChange={(e) => handleFilterChange('role', e.target.value)}
+            className={selectClass}
+            aria-label="Filter by role"
+          >
+            <option value="">All roles</option>
+            <option value="admin">Admin</option>
+            <option value="manager">Manager</option>
+            <option value="staff">Staff</option>
+            <option value="user">User</option>
+          </select>
+          <select
+            value={filters.isActive}
+            onChange={(e) => handleFilterChange('isActive', e.target.value)}
+            className={selectClass}
+            aria-label="Filter by status"
+          >
+            <option value="">All statuses</option>
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="rounded-[18px] border border-[var(--color-border)] bg-white shadow-sm">
+        {loading && staff.length === 0 ? (
+          <div className="flex justify-center py-20">
+            <Loader />
+          </div>
+        ) : !loading && staff.length === 0 ? (
+          <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 text-slate-400">
+              <Users className="h-8 w-8" aria-hidden />
+            </div>
+            <h3 className="text-base font-semibold text-[var(--color-text)]">No staff yet</h3>
+            <p className="mt-2 max-w-sm text-sm text-[var(--color-text-muted)]">
+              Invite your first teammate to delegate work and tighten access control.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setEditingStaff(null);
+                setShowForm(true);
+              }}
+              className="mt-6 inline-flex items-center gap-2 rounded-xl border border-[var(--color-primary)] bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[var(--color-primary-hover)]"
+            >
+              <Plus className="h-4 w-4" aria-hidden />
+              Add staff
+            </button>
+          </div>
+        ) : (
+          <>
+            {loading ? (
+              <div className="flex justify-center border-b border-[var(--color-border)] py-4">
+                <Loader inline />
+              </div>
+            ) : null}
+            <StaffList
+              staff={staff}
+              onEdit={handleEditStaff}
+              onDelete={handleOpenDeleteConfirm}
+              onToggleStatus={handleOpenStatusConfirm}
+            />
+          </>
+        )}
+
+        {!loading && staff.length > 0 && pagination.pages > 1 ? (
+          <div className="flex items-center justify-between gap-4 border-t border-[var(--color-border)] px-4 py-3">
+            <p className="text-xs text-[var(--color-text-muted)]">
+              Page {pagination.page} of {pagination.pages}
+            </p>
+            <div className="flex items-center gap-2">
               <button
-                disabled={pagination.page === 1}
+                type="button"
+                disabled={pagination.page <= 1}
                 onClick={() => fetchStaff(pagination.page - 1)}
-                className="px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg font-semibold text-[var(--color-text)] transition-all hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-1.5 text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-bg)] disabled:pointer-events-none disabled:opacity-40"
               >
+                <ChevronLeft className="h-4 w-4" aria-hidden />
                 Previous
               </button>
-              <span className="text-[var(--color-text)] font-semibold">
-                Page {pagination.page} of {pagination.pages}
-              </span>
               <button
-                disabled={pagination.page === pagination.pages}
+                type="button"
+                disabled={pagination.page >= pagination.pages}
                 onClick={() => fetchStaff(pagination.page + 1)}
-                className="px-4 py-2 bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg font-semibold text-[var(--color-text)] transition-all hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-1.5 text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-bg)] disabled:pointer-events-none disabled:opacity-40"
               >
                 Next
+                <ChevronRight className="h-4 w-4" aria-hidden />
               </button>
             </div>
-          )}
-        </>
-      )}
+          </div>
+        ) : null}
+      </div>
 
-      {/* Form Modal */}
-      <Modal open={showForm} onClose={handleCloseForm} title={editingStaff ? "Edit Staff Member" : "Add Staff Member"}>
-        <StaffForm
-          staff={editingStaff}
-          onSubmit={handleFormSubmit}
-          onCancel={handleCloseForm}
-        />
+      <Modal
+        open={showForm}
+        onClose={handleCloseForm}
+        title={editingStaff ? 'Edit staff member' : 'Add staff member'}
+        panelClassName="max-w-xl"
+      >
+        <StaffForm staff={editingStaff} onSubmit={handleFormSubmit} onCancel={handleCloseForm} />
       </Modal>
 
-      {/* Confirm Dialog */}
       <ConfirmDialog
         open={confirmDialog.show}
-        title={confirmDialog.action === "delete" ? "Delete Staff" : "Update Status"}
+        title={confirmDialog.action === 'delete' ? 'Remove staff' : 'Update access'}
         message={confirmDialog.message}
-        confirmLabel={confirmDialog.action === "delete" ? "Delete" : "Confirm"}
-        onConfirm={
-          confirmDialog.action === "delete"
-            ? handleDeleteStaff
-            : handleToggleStatus
-        }
+        confirmLabel={confirmDialog.action === 'delete' ? 'Remove' : 'Confirm'}
+        confirmVariant={confirmDialog.action === 'delete' ? 'danger' : 'primary'}
+        onConfirm={confirmDialog.action === 'delete' ? handleDeleteStaff : handleToggleStatus}
         onClose={() =>
           setConfirmDialog({
             show: false,
             action: null,
             staffId: null,
-            message: "",
+            message: '',
           })
         }
       />
     </div>
   );
-};
-
-export default StaffManagement;
+}

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Users } from 'lucide-react';
+import { LayoutGrid, Users } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 import { useGoals } from '../../hooks/useGoals';
 import AppShell from '../layout/AppShell';
@@ -9,6 +9,9 @@ import StatsCards from '../stats/StatsCards';
 import GoalPanel from '../goals/GoalPanel';
 import GoalForm from '../goals/GoalForm';
 import StaffManagement from '../staff/StaffManagement';
+
+const tabBtn =
+  'inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2';
 
 export default function AdminDashboard() {
   const { state } = useAppContext();
@@ -30,41 +33,46 @@ export default function AdminDashboard() {
 
   return (
     <>
-      {currentView === 'dashboard' ? (
-        <AppShell
-          stats={<StatsCards goals={state.goals} actions={state.actions} tasks={state.tasks} />}
-          sidebar={
-            <Sidebar goals={goals} selectedGoalId={selectedGoalId} onSelectGoal={selectGoal} />
-          }
-        >
-          <div className="space-y-5">
-            {/* Admin Navigation Tabs */}
-            <div className="rounded-[18px] border border-[var(--color-border)] bg-white p-5 shadow-sm">
-              <div className="flex items-center gap-4 mb-4">
-                <button
-                  onClick={() => setCurrentView('dashboard')}
-                  className={`px-4 py-2 font-semibold rounded-lg transition-all ${
-                    currentView === 'dashboard'
-                      ? 'bg-[var(--color-primary)] text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Dashboard
-                </button>
-                <button
-                  onClick={() => setCurrentView('staff')}
-                  className={`px-4 py-2 font-semibold rounded-lg transition-all flex items-center gap-2 ${
-                    currentView === 'staff'
-                      ? 'bg-[var(--color-primary)] text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  <Users size={18} />
-                  Staff Management
-                </button>
-              </div>
-            </div>
+      <AppShell
+        stats={<StatsCards goals={state.goals} actions={state.actions} tasks={state.tasks} />}
+        sidebar={
+          <Sidebar goals={goals} selectedGoalId={selectedGoalId} onSelectGoal={selectGoal} />
+        }
+      >
+        <div className="rounded-[18px] border border-[var(--color-border)] bg-white p-5 shadow-sm">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+            Admin workspace
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setCurrentView('dashboard')}
+              className={`${tabBtn} ${
+                currentView === 'dashboard'
+                  ? 'bg-[var(--color-primary)] text-white shadow-md shadow-indigo-200/50'
+                  : 'border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-text)] hover:border-[var(--color-border-active)]'
+              }`}
+            >
+              <LayoutGrid className="h-4 w-4 shrink-0" aria-hidden />
+              Dashboard
+            </button>
+            <button
+              type="button"
+              onClick={() => setCurrentView('staff')}
+              className={`${tabBtn} ${
+                currentView === 'staff'
+                  ? 'bg-[var(--color-primary)] text-white shadow-md shadow-indigo-200/50'
+                  : 'border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-text)] hover:border-[var(--color-border-active)]'
+              }`}
+            >
+              <Users className="h-4 w-4 shrink-0" aria-hidden />
+              Staff
+            </button>
+          </div>
+        </div>
 
+        {currentView === 'dashboard' ? (
+          <>
             <div className="rounded-[18px] border border-[var(--color-border)] bg-white p-5 shadow-sm">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
@@ -88,40 +96,11 @@ export default function AdminDashboard() {
             </div>
 
             <GoalPanel goal={selectedGoal} />
-          </div>
-        </AppShell>
-      ) : (
-        <div className="min-h-screen bg-[var(--color-bg)]">
-          <div className="border-b border-[var(--color-border)] bg-white shadow-sm">
-            <div className="mx-auto w-full max-w-[1100px] px-5 py-4">
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => setCurrentView('dashboard')}
-                  className={`px-4 py-2 font-semibold rounded-lg transition-all ${
-                    currentView === 'dashboard'
-                      ? 'bg-[var(--color-primary)] text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Dashboard
-                </button>
-                <button
-                  onClick={() => setCurrentView('staff')}
-                  className={`px-4 py-2 font-semibold rounded-lg transition-all flex items-center gap-2 ${
-                    currentView === 'staff'
-                      ? 'bg-[var(--color-primary)] text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  <Users size={18} />
-                  Staff Management
-                </button>
-              </div>
-            </div>
-          </div>
+          </>
+        ) : (
           <StaffManagement />
-        </div>
-      )}
+        )}
+      </AppShell>
 
       <GoalForm
         open={goalModalOpen}

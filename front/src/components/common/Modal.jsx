@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
-export default function Modal({ open, title, onClose, children, footer }) {
+export default function Modal({ open, title, onClose, children, footer, panelClassName = '' }) {
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => {
@@ -25,7 +25,7 @@ export default function Modal({ open, title, onClose, children, footer }) {
       <div
         role="dialog"
         aria-modal="true"
-        className="relative z-10 w-full max-w-lg rounded-lg bg-[var(--color-card)] p-0 shadow-modal transition-all duration-150"
+        className={`relative z-10 w-full ${panelClassName || 'max-w-lg'} rounded-lg bg-[var(--color-card)] p-0 shadow-modal transition-all duration-150`}
       >
         <div className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-4">
           <h2 className="text-lg font-semibold text-[var(--color-text)]">{title}</h2>

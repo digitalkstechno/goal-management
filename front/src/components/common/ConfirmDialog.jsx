@@ -1,6 +1,19 @@
 import Modal from './Modal';
 
-export default function ConfirmDialog({ open, title, message, confirmLabel = 'Delete', onConfirm, onClose }) {
+export default function ConfirmDialog({
+  open,
+  title,
+  message,
+  confirmLabel = 'Delete',
+  confirmVariant = 'danger',
+  onConfirm,
+  onClose,
+}) {
+  const confirmClass =
+    confirmVariant === 'primary'
+      ? 'rounded-md bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-primary-hover)]'
+      : 'rounded-md bg-[var(--color-danger)] px-4 py-2 text-sm font-semibold text-[var(--color-card)] hover:opacity-90';
+
   return (
     <Modal
       open={open}
@@ -17,11 +30,14 @@ export default function ConfirmDialog({ open, title, message, confirmLabel = 'De
           </button>
           <button
             type="button"
-            onClick={() => {
-              onConfirm?.();
-              onClose?.();
+            className={confirmClass}
+            onClick={async () => {
+              try {
+                await onConfirm?.();
+              } finally {
+                onClose?.();
+              }
             }}
-            className="rounded-md bg-[var(--color-danger)] px-4 py-2 text-sm font-semibold text-[var(--color-card)] hover:opacity-90"
           >
             {confirmLabel}
           </button>
