@@ -189,6 +189,10 @@ export function AppProvider({ children }) {
     });
   }, []);
 
+  const updateTaskState = useCallback((task) => {
+    dispatch({ type: 'UPDATE_TASK', payload: task });
+  }, []);
+
   const removeTask = useCallback(async (id) => {
     await apiHandler(() => deleteTask(id), {
       successMsg: 'Task deleted',
@@ -260,6 +264,7 @@ export function AppProvider({ children }) {
     removeAction,
     addTask,
     editTask,
+    updateTaskState,
     removeTask,
     completeTask,
     reorderTasks,

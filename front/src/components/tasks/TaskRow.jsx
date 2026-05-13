@@ -34,7 +34,7 @@ function TaskRowInner({
   dragListeners,
   isDragging,
 }) {
-  const { state } = useAppContext();
+  const { state, updateTaskState } = useAppContext();
   const { completeTask, removeTask, reorderTasks, editTask } = useTasks(actionId);
   const { isAdmin, currentUser } = useAuth();
   const [notesOpen, setNotesOpen] = useState(false);
@@ -74,9 +74,9 @@ function TaskRowInner({
     if (safe !== (task.currentValue ?? 0)) {
       try {
         setUpdatingProgress(true);
-        await updateNumericProgress(task.id, 'set', safe);
-        // Update local state via editTask
-        editTask(task.id, { ...task, currentValue: safe });
+        const updated = await updateNumericProgress(task.id, 'set', safe);
+        updateTaskState(updated);
+        setCountDraft(String(updated.currentValue ?? 0));
         toast.success('Progress updated');
       } catch (error) {
         toast.error(error.response?.data?.message || 'Failed to update progress');
@@ -89,14 +89,15 @@ function TaskRowInner({
 
   const bumpCount = async (delta) => {
     if (!isNumeric || !canUpdateNumeric || done) return;
-    const base = task.currentValue ?? 0;
+    const base = Number(task.currentValue ?? 0);
     const n = Math.max(0, base + delta);
     setCountDraft(String(n));
     try {
       setUpdatingProgress(true);
       const op = delta > 0 ? 'increment' : 'decrement';
-      await updateNumericProgress(task.id, op);
-      editTask(task.id, { ...task, currentValue: n });
+      const updated = await updateNumericProgress(task.id, op);
+      updateTaskState(updated);
+      setCountDraft(String(updated.currentValue ?? 0));
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to update progress');
       setCountDraft(String(task.currentValue ?? 0));
