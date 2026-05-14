@@ -167,22 +167,19 @@ export default function StaffManagement() {
     <div className="space-y-5 animate-fade-in">
       <div className="rounded-[18px] border border-[var(--color-border)] bg-white p-5 shadow-sm">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex gap-4">
+          <div className="flex gap-4 items-center">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-primary-light)] text-[var(--color-primary)]">
               <Users className="h-6 w-6" aria-hidden />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-[var(--color-text)]">Team &amp; access</h2>
-              <p className="mt-1 max-w-xl text-sm text-[var(--color-text-muted)]">
-                Add staff accounts, assign roles, and control who can sign in. Email must be unique
-                per team.
-              </p>
-              {!loading && pagination.total > 0 ? (
+           
+              {/* {!loading && pagination.total > 0 ? (
                 <p className="mt-2 text-xs font-medium text-[var(--color-text-muted)]">
                   {pagination.total} member{pagination.total === 1 ? '' : 's'}
                   {staff.length > 0 ? ` · ${activeCount} active on this page` : ''}
                 </p>
-              ) : null}
+              ) : null} */}
             </div>
           </div>
           <button

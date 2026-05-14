@@ -46,16 +46,15 @@ export default function AdminDashboard() {
         }
       >
         <div className="rounded-[18px] border border-[var(--color-border)] bg-white p-5 shadow-sm">
-       
+
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => setCurrentView('dashboard')}
-              className={`${tabBtn} ${
-                currentView === 'dashboard'
+              className={`${tabBtn} ${currentView === 'dashboard'
                   ? 'bg-[var(--color-primary)] text-white shadow-md shadow-indigo-200/50'
                   : 'border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-text)] hover:border-[var(--color-border-active)]'
-              }`}
+                }`}
             >
               <LayoutGrid className="h-4 w-4 shrink-0" aria-hidden />
               Dashboard
@@ -63,11 +62,10 @@ export default function AdminDashboard() {
             <button
               type="button"
               onClick={() => setCurrentView('staff')}
-              className={`${tabBtn} ${
-                currentView === 'staff'
+              className={`${tabBtn} ${currentView === 'staff'
                   ? 'bg-[var(--color-primary)] text-white shadow-md shadow-indigo-200/50'
                   : 'border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-text)] hover:border-[var(--color-border-active)]'
-              }`}
+                }`}
             >
               <Users className="h-4 w-4 shrink-0" aria-hidden />
               Staff
@@ -79,12 +77,17 @@ export default function AdminDashboard() {
           <>
             <div className="rounded-[18px] border border-[var(--color-border)] bg-white p-5 shadow-sm">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-[var(--color-text)]">Workspace</h2>
-                  <p className="text-sm text-[var(--color-text-muted)]">
-                    Create and manage goals from the workspace panel.
-                  </p>
+                <div className="flex gap-4 items-center">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-primary-light)] text-[var(--color-primary)]">
+                    <Users className="h-6 w-6" aria-hidden />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold text-[var(--color-text)]">Workspace</h2>
+
+                   
+                  </div>
                 </div>
+          
                 <button
                   type="button"
                   onClick={() => setGoalModalOpen(true)}
