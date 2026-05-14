@@ -76,6 +76,9 @@ const actionSchema = new mongoose.Schema(
           trim: true,
           maxlength: 1000,
         },
+        voiceNoteUrl: {
+          type: String,
+        },
         createdAt: {
           type: Date,
           default: Date.now,

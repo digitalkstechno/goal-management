@@ -167,7 +167,7 @@ const deleteAction = asyncHandler(async (req, res) => {
 // Add an update to an action
 const addActionUpdate = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { assignedUserId, assignedStaffId, notes, actionText, createdAt } = req.body;
+  const { assignedUserId, assignedStaffId, notes, actionText, voiceNoteUrl, createdAt } = req.body;
 
   const action = await Action.findById(id);
   if (!action) {
@@ -179,6 +179,7 @@ const addActionUpdate = asyncHandler(async (req, res) => {
     assignedStaffId,
     notes,
     actionText,
+    voiceNoteUrl,
   };
 
   if (createdAt) {
