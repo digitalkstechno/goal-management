@@ -423,20 +423,26 @@ const updateNumericProgress = asyncHandler(async (req, res) => {
 // Add an update to a task
 const addTaskUpdate = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { assignedUserId, assignedStaffId, notes, actionText, voiceNoteUrl } = req.body;
+  const { assignedUserId, assignedStaffId, notes, actionText, voiceNoteUrl, createdAt } = req.body;
 
   const task = await Task.findById(id);
   if (!task) {
     throw new ApiError(404, "Task not found");
   }
 
-  task.updates.push({
+  const updatePayload = {
     assignedUserId,
     assignedStaffId,
     notes,
     actionText,
     voiceNoteUrl,
-  });
+  };
+
+  if (createdAt) {
+    updatePayload.createdAt = new Date(createdAt);
+  }
+
+  task.updates.push(updatePayload);
 
   const updatedTask = await task.save();
   const populatedTask = await updatedTask.populate([

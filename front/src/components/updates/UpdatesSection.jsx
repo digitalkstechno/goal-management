@@ -4,7 +4,7 @@ import { MessageSquare, User, Activity, FileAudio, Plus } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useAppContext } from '../../context/AppContext';
 import { userDisplayName } from '../../utils/userDisplay';
-import AudioRecorder from './AudioRecorder';
+import AudioRecorder from '../common/AudioRecorder';
 import { uploadAudio } from '../../api/uploadApi';
 
 export default function UpdatesSection({ item, type, onAddUpdate }) {
@@ -16,13 +16,11 @@ export default function UpdatesSection({ item, type, onAddUpdate }) {
   const [assigneeId, setAssigneeId] = useState('');
   const [notes, setNotes] = useState('');
   const [actionText, setActionText] = useState('');
+  const [updateDate, setUpdateDate] = useState(() => format(new Date(), "yyyy-MM-dd'T'HH:mm"));
   const [audioBlob, setAudioBlob] = useState(null);
 
-  // Combine users and staff for the dropdown
-  const allAssignees = [
-    ...state.users.map(u => ({ ...u, _type: 'user' })),
-    ...(state.staff || []).map(s => ({ ...s, _type: 'staff' }))
-  ];
+  // The state.users now contains both users and staff from fetchUsersAndStaff
+  const allAssignees = state.users;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,10 +37,22 @@ export default function UpdatesSection({ item, type, onAddUpdate }) {
       let assignedUserId = null;
       let assignedStaffId = null;
 
-      if (assigneeId) {
-        const [id, type] = assigneeId.split('::');
-        if (type === 'user') assignedUserId = id;
-        else assignedStaffId = id;
+      if (type === 'task') {
+        // Automatically assign the update to the person assigned to the task
+        const itemAssignedUserId = item.assignedUserId?.id || item.assignedUserId?._id || item.assignedUserId;
+        const itemAssignedStaffId = item.assignedStaffId?.id || item.assignedStaffId?._id || item.assignedStaffId;
+        
+        if (itemAssignedUserId) assignedUserId = itemAssignedUserId;
+        if (itemAssignedStaffId) assignedStaffId = itemAssignedStaffId;
+      } else {
+        if (assigneeId) {
+          const assignedPerson = allAssignees.find(a => a.id === assigneeId);
+          if (assignedPerson?.assignmentType === 'staff') {
+            assignedStaffId = assigneeId;
+          } else {
+            assignedUserId = assigneeId;
+          }
+        }
       }
 
       const payload = {
@@ -50,15 +60,16 @@ export default function UpdatesSection({ item, type, onAddUpdate }) {
         assignedStaffId,
         notes,
         actionText,
+        createdAt: new Date(updateDate).toISOString(),
         ...(voiceNoteUrl && { voiceNoteUrl })
       };
 
       await onAddUpdate(payload);
       
-      // Reset form
       setAssigneeId('');
       setNotes('');
       setActionText('');
+      setUpdateDate(format(new Date(), "yyyy-MM-dd'T'HH:mm"));
       setAudioBlob(null);
       setIsAdding(false);
     } catch (err) {
@@ -70,16 +81,17 @@ export default function UpdatesSection({ item, type, onAddUpdate }) {
   };
 
   const getAssigneeDetails = (update) => {
-    if (update.assignedUserId) {
+    const id = update.assignedUserId || update.assignedStaffId;
+    if (!id) return null;
+    
+    // Support both ID as object with id field or just string
+    const targetId = typeof id === 'object' ? id.id || id._id : id;
+    const person = state.users.find(u => u.id === targetId || u._id === targetId);
+    
+    if (person) {
       return {
-        name: userDisplayName(update.assignedUserId, state.users),
-        type: 'User'
-      };
-    }
-    if (update.assignedStaffId) {
-      return {
-        name: userDisplayName(update.assignedStaffId, state.staff),
-        type: 'Staff'
+        name: person.name || person.username,
+        type: person.assignmentType === 'staff' ? 'Staff' : 'User'
       };
     }
     return null;
@@ -107,22 +119,39 @@ export default function UpdatesSection({ item, type, onAddUpdate }) {
       {isAdding && (
         <form onSubmit={handleSubmit} className="bg-slate-50 p-4 rounded-xl border border-[var(--color-border)] mb-4">
           <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-[var(--color-text-muted)] mb-1 uppercase tracking-wider">
-                Assign Person
-              </label>
-              <select
-                value={assigneeId}
-                onChange={(e) => setAssigneeId(e.target.value)}
-                className="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
-              >
-                <option value="">-- None --</option>
-                {allAssignees.map(a => (
-                  <option key={a.id} value={`${a.id}::${a._type}`}>
-                    {a.name || a.username} ({a._type})
-                  </option>
-                ))}
-              </select>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label className="block text-xs font-bold text-[var(--color-text-muted)] mb-1 uppercase tracking-wider">
+                  Date
+                </label>
+                <input
+                  type="datetime-local"
+                  value={updateDate}
+                  onChange={(e) => setUpdateDate(e.target.value)}
+                  required
+                  className="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                />
+              </div>
+
+              {type !== 'task' && (
+                <div>
+                  <label className="block text-xs font-bold text-[var(--color-text-muted)] mb-1 uppercase tracking-wider">
+                    Assign Person
+                  </label>
+                  <select
+                    value={assigneeId}
+                    onChange={(e) => setAssigneeId(e.target.value)}
+                    className="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                  >
+                    <option value="">-- None --</option>
+                    {allAssignees.map(a => (
+                      <option key={a.id} value={a.id}>
+                        {a.name || a.username} {a.assignmentType === 'staff' ? '(Staff)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
 
             <div>
@@ -138,18 +167,20 @@ export default function UpdatesSection({ item, type, onAddUpdate }) {
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-[var(--color-text-muted)] mb-1 uppercase tracking-wider">
-                Action Taken
-              </label>
-              <input
-                type="text"
-                value={actionText}
-                onChange={(e) => setActionText(e.target.value)}
-                placeholder="What action was taken?"
-                className="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
-              />
-            </div>
+            {type !== 'task' && (
+              <div>
+                <label className="block text-xs font-bold text-[var(--color-text-muted)] mb-1 uppercase tracking-wider">
+                  Action Taken
+                </label>
+                <input
+                  type="text"
+                  value={actionText}
+                  onChange={(e) => setActionText(e.target.value)}
+                  placeholder="What action was taken?"
+                  className="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 text-sm focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                />
+              </div>
+            )}
 
             {type === 'task' && (
               <div>
@@ -171,7 +202,7 @@ export default function UpdatesSection({ item, type, onAddUpdate }) {
               </button>
               <button
                 type="submit"
-                disabled={loading || (!notes && !actionText && !audioBlob)}
+                disabled={loading || (!notes && type !== 'task' && !actionText && !audioBlob) || (type === 'task' && !notes && !audioBlob)}
                 className="rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-bold text-[var(--color-card)] hover:bg-[var(--color-primary-hover)] transition-colors disabled:opacity-50"
               >
                 {loading ? 'Saving...' : 'Save Update'}
@@ -185,7 +216,7 @@ export default function UpdatesSection({ item, type, onAddUpdate }) {
         {(!item.updates || item.updates.length === 0) ? (
           <p className="text-sm text-[var(--color-text-muted)] italic">No updates recorded yet.</p>
         ) : (
-          [...item.updates].reverse().map((update, idx) => {
+          [...item.updates].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map((update, idx) => {
             const assignee = getAssigneeDetails(update);
             
             return (

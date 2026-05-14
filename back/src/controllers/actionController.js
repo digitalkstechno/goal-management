@@ -167,19 +167,25 @@ const deleteAction = asyncHandler(async (req, res) => {
 // Add an update to an action
 const addActionUpdate = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { assignedUserId, assignedStaffId, notes, actionText } = req.body;
+  const { assignedUserId, assignedStaffId, notes, actionText, createdAt } = req.body;
 
   const action = await Action.findById(id);
   if (!action) {
     throw new ApiError(404, "Action not found");
   }
 
-  action.updates.push({
+  const updatePayload = {
     assignedUserId,
     assignedStaffId,
     notes,
     actionText,
-  });
+  };
+
+  if (createdAt) {
+    updatePayload.createdAt = new Date(createdAt);
+  }
+
+  action.updates.push(updatePayload);
 
   const updatedAction = await action.save();
   const populatedAction = await updatedAction.populate([
