@@ -73,8 +73,8 @@ export default function GoalPanel({ goal }) {
               {progress}% COMPLETED
             </span>
           </div>
-          
-          <h2 className="text-4xl font-black tracking-tight text-slate-900 mb-6">
+
+          <h2 className="text-2xl font-black tracking-tight text-slate-900 mb-6">
             {goal.name}
           </h2>
 
@@ -178,7 +178,7 @@ export default function GoalPanel({ goal }) {
           <ListTodo className="h-5 w-5 text-[var(--color-primary)]" />
           <h4 className="text-lg font-bold text-[var(--color-text)] tracking-tight">Action Items</h4>
         </div>
-        
+
         <div className="flex-1 overflow-y-auto p-5 scrollbar-thin">
           <ActionList
             goalId={goal.id}

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import Modal from '../common/Modal';
+import toast from 'react-hot-toast';
 import { apiHandler } from '../../utils/apiHandler';
 import { fetchUsersAndStaff } from '../../api/userApi';
 import { formatDateForInput } from '../../utils/dateUtils';
@@ -87,9 +88,15 @@ export default function TaskForm({ open, onClose, actionId, initialTask, onCreat
         : 'border-[var(--color-border)]'
     }`;
 
-  const submit = () => {
+  const submit = async () => {
     setAttempted(true);
     if (!form.name.trim() || !form.startDate || !form.deadline) return;
+
+    if (new Date(form.startDate) > new Date(form.deadline)) {
+      toast.error('Start date cannot be ahead of deadline');
+      return;
+    }
+
     if (form.taskType === TASK_TYPE.NUMERIC) {
       const tv = Number(form.targetValue);
       const cv = Number(form.currentValue);
@@ -130,9 +137,14 @@ export default function TaskForm({ open, onClose, actionId, initialTask, onCreat
             currentValue: null,
           }),
     };
-    if (initialTask) onSave?.(initialTask.id, payload);
-    else onCreate?.(payload);
-    onClose?.();
+    
+    let res;
+    if (initialTask) res = await onSave?.(initialTask.id, payload);
+    else res = await onCreate?.(payload);
+    
+    if (!res?.error) {
+      onClose?.();
+    }
   };
 
   return (

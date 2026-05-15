@@ -131,7 +131,7 @@ export function AppProvider({ children }) {
   }, [loadGoals, loadActions, loadTasks, loadUsers]);
 
   const addGoal = useCallback(async (payload) => {
-    await apiHandler(() => createGoal(payload), {
+    return await apiHandler(() => createGoal(payload), {
       successMsg: 'Goal created successfully',
       errorMsg: 'Failed to create goal',
       onSuccess: (data) => dispatch({ type: 'ADD_GOAL', payload: data }),
@@ -139,7 +139,7 @@ export function AppProvider({ children }) {
   }, []);
 
   const editGoal = useCallback(async (id, payload) => {
-    await apiHandler(() => updateGoal(id, payload), {
+    return await apiHandler(() => updateGoal(id, payload), {
       successMsg: 'Goal updated',
       errorMsg: 'Failed to update goal',
       onSuccess: (data) => dispatch({ type: 'UPDATE_GOAL', payload: data }),
@@ -147,7 +147,7 @@ export function AppProvider({ children }) {
   }, []);
 
   const removeGoal = useCallback(async (id) => {
-    await apiHandler(() => deleteGoal(id), {
+    return await apiHandler(() => deleteGoal(id), {
       successMsg: 'Goal deleted',
       errorMsg: 'Failed to delete goal',
       onSuccess: async () => {
@@ -158,7 +158,7 @@ export function AppProvider({ children }) {
   }, [loadActions, loadTasks]);
 
   const addAction = useCallback(async (payload) => {
-    await apiHandler(() => createAction(payload), {
+    return await apiHandler(() => createAction(payload), {
       successMsg: 'Action created',
       errorMsg: 'Failed to create action',
       onSuccess: (data) => dispatch({ type: 'ADD_ACTION', payload: data }),
@@ -166,7 +166,7 @@ export function AppProvider({ children }) {
   }, []);
 
   const editAction = useCallback(async (id, payload) => {
-    await apiHandler(() => updateAction(id, payload), {
+    return await apiHandler(() => updateAction(id, payload), {
       successMsg: 'Action updated',
       errorMsg: 'Failed to update action',
       onSuccess: (data) => dispatch({ type: 'UPDATE_ACTION', payload: data }),
@@ -182,7 +182,7 @@ export function AppProvider({ children }) {
   }, []);
 
   const removeAction = useCallback(async (id) => {
-    await apiHandler(() => deleteAction(id), {
+    return await apiHandler(() => deleteAction(id), {
       successMsg: 'Action deleted',
       errorMsg: 'Failed to delete action',
       onSuccess: async () => {
@@ -193,7 +193,7 @@ export function AppProvider({ children }) {
   }, [loadTasks]);
 
   const addTask = useCallback(async (payload) => {
-    await apiHandler(() => createTask(payload), {
+    return await apiHandler(() => createTask(payload), {
       successMsg: 'Task created',
       errorMsg: 'Failed to create task',
       onSuccess: (data) => dispatch({ type: 'ADD_TASK', payload: data }),
@@ -201,7 +201,7 @@ export function AppProvider({ children }) {
   }, []);
 
   const editTask = useCallback(async (id, payload) => {
-    await apiHandler(() => updateTask(id, payload), {
+    return await apiHandler(() => updateTask(id, payload), {
       successMsg: 'Task updated',
       errorMsg: 'Failed to update task',
       onSuccess: (data) => dispatch({ type: 'UPDATE_TASK', payload: data }),
@@ -221,7 +221,7 @@ export function AppProvider({ children }) {
   }, []);
 
   const removeTask = useCallback(async (id) => {
-    await apiHandler(() => deleteTask(id), {
+    return await apiHandler(() => deleteTask(id), {
       successMsg: 'Task deleted',
       errorMsg: 'Failed to delete task',
       onSuccess: (data) => {

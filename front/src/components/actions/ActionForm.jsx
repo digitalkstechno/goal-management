@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import Modal from '../common/Modal';
+import toast from 'react-hot-toast';
 import { useAuth } from '../../hooks/useAuth';
 import { apiHandler } from '../../utils/apiHandler';
 import { fetchUsersAndStaff } from '../../api/userApi';
@@ -78,9 +79,14 @@ export default function ActionForm({ open, onClose, goalId, initialAction, onCre
     });
   };
 
-  const submit = () => {
+  const submit = async () => {
     setAttempted(true);
     if (!form.name.trim() || !form.startDate || !form.deadline || !form.ownerId) return;
+
+    if (new Date(form.startDate) > new Date(form.deadline)) {
+      toast.error('Start date cannot be ahead of deadline');
+      return;
+    }
     
     // Find the owner to determine if it's staff or user
     const owner = staff.find(u => u.id === form.ownerId);
@@ -98,9 +104,14 @@ export default function ActionForm({ open, onClose, goalId, initialAction, onCre
       priority: form.priority,
       status: form.status,
     };
-    if (initialAction) onSave?.(initialAction.id, { ...initialAction, ...payload });
-    else onCreate?.({ ...payload, goalId });
-    onClose?.();
+    
+    let res;
+    if (initialAction) res = await onSave?.(initialAction.id, { ...initialAction, ...payload });
+    else res = await onCreate?.({ ...payload, goalId });
+    
+    if (!res?.error) {
+      onClose?.();
+    }
   };
 
   return (

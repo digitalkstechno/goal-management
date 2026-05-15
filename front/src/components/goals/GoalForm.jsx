@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import Modal from '../common/Modal';
+import toast from 'react-hot-toast';
 import { useAuth } from '../../hooks/useAuth';
 import { apiHandler } from '../../utils/apiHandler';
 import { staffApi } from '../../api/staffApi';
@@ -83,9 +84,14 @@ export default function GoalForm({ open, onClose, initialGoal, onSave }) {
         : 'border-[var(--color-border)]'
     }`;
 
-  const submit = () => {
+  const submit = async () => {
     setAttempted(true);
     if (!form.name.trim() || !form.startDate || !form.deadline || !form.ownerId || !form.responsibleId) return;
+
+    if (new Date(form.startDate) > new Date(form.deadline)) {
+      toast.error('Start date cannot be ahead of deadline');
+      return;
+    }
     
     // Find owners to determine if they're staff or users
     const owner = staff.find((u) => u.id === form.ownerId);
@@ -93,7 +99,7 @@ export default function GoalForm({ open, onClose, initialGoal, onSave }) {
     const isOwnerStaff = owner?.assignmentType === 'staff';
     const isResponsibleStaff = responsible?.assignmentType === 'staff';
 
-    onSave?.({
+    const { error } = await onSave?.({
       name: form.name.trim(),
       description: form.description.trim(),
       startDate: form.startDate,
@@ -105,7 +111,10 @@ export default function GoalForm({ open, onClose, initialGoal, onSave }) {
       status: form.status,
       priority: form.priority,
     });
-    onClose?.();
+    
+    if (!error) {
+      onClose?.();
+    }
   };
 
   return (
