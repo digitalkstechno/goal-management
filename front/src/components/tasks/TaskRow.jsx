@@ -11,7 +11,7 @@ import {
   Pencil,
   Activity,
 } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, differenceInDays, startOfDay } from 'date-fns';
 import toast from 'react-hot-toast';
 import { useAppContext } from '../../context/AppContext';
 import { useTasks } from '../../hooks/useTasks';
@@ -45,6 +45,18 @@ function TaskRowInner({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [updatesOpen, setUpdatesOpen] = useState(false);
   const isNumeric = task.taskType === TASK_TYPE.NUMERIC;
+
+  // ── Days elapsed since task start date (computed in frontend only) ──
+  const daysFromStart = (() => {
+    if (!task.startDate) return null;
+    try {
+      const start = startOfDay(parseISO(task.startDate));
+      const today = startOfDay(new Date());
+      return differenceInDays(today, start);
+    } catch {
+      return null;
+    }
+  })();
   const [countDraft, setCountDraft] = useState(() =>
     isNumeric ? String(task.currentValue ?? 0) : '0'
   );
@@ -245,6 +257,24 @@ function TaskRowInner({
               {userDisplayName(task.assignedUserId, state.users)}
             </span>
             <PriorityBadge priority={task.priority} />
+            {daysFromStart !== null && (
+              <span
+                title={`Started: ${task.startDate ? format(parseISO(task.startDate), 'MMM d, yyyy') : '—'}`}
+                className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                  daysFromStart === 0
+                    ? 'bg-blue-100 text-blue-700'
+                    : daysFromStart > 0
+                    ? 'bg-orange-100 text-orange-700'
+                    : 'bg-slate-100 text-slate-500'
+                }`}
+              >
+                {daysFromStart === 0
+                  ? 'Starts today'
+                  : daysFromStart < 0
+                  ? `Starts in ${Math.abs(daysFromStart)}d`
+                  : `Day ${daysFromStart}`}
+              </span>
+            )}
             {done && task.completedAt ? (
               <span className="text-emerald-600">
                 Completed {format(parseISO(task.completedAt), 'MMM d')}
