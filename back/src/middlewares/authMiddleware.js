@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const Staff = require("../models/Staff");
 const ApiError = require("../utils/ApiError");
 const asyncHandler = require("../utils/asyncHandler");
 
@@ -18,9 +19,16 @@ const protect = (jwtSecret) =>
       throw new ApiError(401, "Unauthorized. Invalid token.");
     }
 
-    const user = await User.findById(decodedToken.userId).select(
+    let user = await User.findById(decodedToken.userId).select(
       "-password -__v"
     );
+
+    if (!user) {
+      user = await Staff.findById(decodedToken.userId).select(
+        "-password -__v"
+      );
+    }
+
     if (!user || !user.isActive) {
       throw new ApiError(401, "Unauthorized. User not found or inactive.");
     }

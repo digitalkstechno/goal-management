@@ -65,8 +65,9 @@ const createStaff = asyncHandler(async (req, res) => {
 const getStaff = asyncHandler(async (req, res) => {
   const { role, isActive, page = 1, limit = 10 } = req.query;
 
-  // Build query
-  const query = { adminId: req.user._id };
+  // Build query: admins see their staff; staff/managers see their colleagues (same adminId)
+  const adminId = req.user.role === ROLES.ADMIN ? req.user._id : req.user.adminId;
+  const query = { adminId };
 
   if (role) {
     query.role = role;
@@ -113,9 +114,10 @@ const getStaffById = asyncHandler(async (req, res) => {
   const { id } = req.params;
   assertValidStaffId(id);
 
+  const adminId = req.user.role === ROLES.ADMIN ? req.user._id : req.user.adminId;
   const staff = await Staff.findOne({
     _id: id,
-    adminId: req.user._id,
+    adminId,
   }).select("-password");
 
   if (!staff) {

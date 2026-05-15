@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const Staff = require("../models/Staff");
 const ApiError = require("../utils/ApiError");
 const asyncHandler = require("../utils/asyncHandler");
 const generateToken = require("../utils/generateToken");
@@ -48,15 +49,39 @@ const login = (env) =>
     if (!email || !password) {
       throw new ApiError(400, "Email and password are required.");
     }
+    console.log(`Login attempt for: ${email}`);
 
-    const user = await User.findOne({ email: email.toLowerCase() }).select(
+    let user = await User.findOne({ email: email.toLowerCase() }).select(
       "+password"
     );
-    if (!user || !(await user.comparePassword(password))) {
+    let userType = "user";
+
+    if (!user) {
+      console.log(`Not found in User, checking Staff...`);
+      user = await Staff.findOne({ email: email.toLowerCase() }).select(
+        "+password"
+      );
+      userType = "staff";
+    }
+
+    if (!user) {
+      throw new ApiError(401, "Invalid email or password.");
+    }
+
+    let isMatch = false;
+    try {
+      isMatch = await user.comparePassword(password);
+    } catch (err) {
+      console.error(`Auth error for ${user.email}:`, err);
+      throw new ApiError(500, "Internal server error during authentication.");
+    }
+
+    if (!isMatch) {
       throw new ApiError(401, "Invalid email or password.");
     }
 
     if (!user.isActive) {
+      console.log(`[AUTH] Account is inactive for ${userType} ${user.email}`);
       throw new ApiError(403, "Account is inactive.");
     }
 
@@ -71,6 +96,7 @@ const login = (env) =>
           email: user.email,
           role: user.role,
           permissions: user.permissions,
+          userType, // Optional: helpful for frontend to know
         },
       },
     });

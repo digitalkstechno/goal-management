@@ -28,20 +28,20 @@ const buildStaffRoutes = (env) => {
     createStaff
   );
 
-  // Get all staff for admin - Only admins
+  // Get all staff for admin - Only admins, managers and staff
   router.get(
     "/",
     auth,
-    authorizeRoles(ROLES.ADMIN),
+    authorizeRoles(ROLES.ADMIN, ROLES.MANAGER, ROLES.STAFF),
     requirePermissions("view_staff"),
     getStaff
   );
 
-  // Get staff by ID - Only admins
+  // Get staff by ID - Only admins, managers and staff
   router.get(
     "/:id",
     auth,
-    authorizeRoles(ROLES.ADMIN),
+    authorizeRoles(ROLES.ADMIN, ROLES.MANAGER, ROLES.STAFF),
     requirePermissions("view_staff"),
     getStaffById
   );

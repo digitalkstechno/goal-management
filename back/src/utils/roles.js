@@ -23,6 +23,7 @@ const ROLE_PERMISSIONS = {
   [ROLES.STAFF]: [
     "view_profile",
     "edit_profile",
+    "view_staff",
     "view_goals",
     "manage_goals",
     "view_tasks",
@@ -32,6 +33,7 @@ const ROLE_PERMISSIONS = {
   ],
   [ROLES.MANAGER]: [
     "view_users",
+    "view_staff",
     "view_profile",
     "edit_profile",
     "view_goals",
