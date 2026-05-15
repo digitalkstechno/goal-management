@@ -133,7 +133,7 @@ export default function AuthScreen() {
             </div>
 
             <div className="space-y-1.5">
-              
+              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider ml-1">Password</label>
               <input
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm transition-all focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-50 outline-none"
                 type="password"

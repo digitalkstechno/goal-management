@@ -23,11 +23,11 @@ const buildActionRoutes = (env) => {
   // POST /actions - Create a new action (requires manage_actions permission)
   router.post("/", auth, requirePermissions("manage_actions"), createAction);
 
-  // PUT /actions/:id - Update an action (requires manage_actions permission)
-  router.put("/:id", auth, requirePermissions("manage_actions"), updateAction);
+  // PUT /actions/:id - Update an action
+  router.put("/:id", auth, updateAction);
 
-  // DELETE /actions/:id - Delete an action (requires manage_actions permission)
-  router.delete("/:id", auth, requirePermissions("manage_actions"), deleteAction);
+  // DELETE /actions/:id - Delete an action
+  router.delete("/:id", auth, deleteAction);
 
   // POST /actions/:id/updates - Add an update to an action
   router.post("/:id/updates", auth, addActionUpdate);

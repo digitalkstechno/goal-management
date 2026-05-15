@@ -211,6 +211,16 @@ const updateTask = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Task not found");
   }
 
+  // Permission check: admin OR assigned
+  const isAdmin = req.user.role === "admin";
+  const isAssigned =
+    task.assignedUserId?.toString() === req.user._id.toString() ||
+    task.assignedStaffId?.toString() === req.user._id.toString();
+
+  if (!isAdmin && !isAssigned) {
+    throw new ApiError(403, "You don't have permission to update this task");
+  }
+
   // Check for date validity
   const newStartDate = startDate ? new Date(startDate) : task.startDate;
   const newDeadline = deadline ? new Date(deadline) : task.deadline;
@@ -314,6 +324,16 @@ const deleteTask = asyncHandler(async (req, res) => {
   const task = await Task.findById(id);
   if (!task) {
     throw new ApiError(404, "Task not found");
+  }
+
+  // Permission check: admin OR assigned
+  const isAdmin = req.user.role === "admin";
+  const isAssigned =
+    task.assignedUserId?.toString() === req.user._id.toString() ||
+    task.assignedStaffId?.toString() === req.user._id.toString();
+
+  if (!isAdmin && !isAssigned) {
+    throw new ApiError(403, "You don't have permission to delete this task");
   }
 
   await Task.findByIdAndDelete(id);

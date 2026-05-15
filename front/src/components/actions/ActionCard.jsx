@@ -29,13 +29,16 @@ export default function ActionCard({ action, restrictUser, currentUserId }) {
   const overdue =
     getDeadlineStatus(action.deadline) === DEADLINE_STATUS.OVERDUE && progress < 100;
 
-  const canAddTask = useMemo(() => {
+  const canManage = useMemo(() => {
     if (isAdmin) return true;
-    const oid = action.ownerId?.id || action.ownerId;
+    const oid = action.ownerId?.id || action.ownerId || action.ownerStaffId?.id || action.ownerStaffId;
     if (oid === currentUser.id) return true;
     const assignedIds = (action.assignedUserIds || []).map((u) => u.id || u);
-    return assignedIds.includes(currentUser.id);
+    const assignedStaffIds = (action.assignedStaffIds || []).map((u) => u.id || u);
+    return assignedIds.includes(currentUser.id) || assignedStaffIds.includes(currentUser.id);
   }, [isAdmin, action, currentUser.id]);
+
+  const canAddTask = canManage;
 
   const deadlineLabel = action.deadline
     ? (() => {
@@ -113,7 +116,7 @@ export default function ActionCard({ action, restrictUser, currentUserId }) {
               </button>
             </div>
 
-            {isAdmin && (
+            {canManage && (
               <div className="flex items-center gap-2">
                 <button
                   type="button"

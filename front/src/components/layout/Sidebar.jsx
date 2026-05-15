@@ -101,11 +101,10 @@ export default function Sidebar({ goals, selectedGoalId, onSelectGoal }) {
             key={t.id}
             type="button"
             onClick={() => setTab(t.id)}
-            className={`flex-1 px-2 py-1.5 text-xs font-bold rounded-lg transition-all ${
-              tab === t.id
+            className={`flex-1 px-2 py-1.5 text-xs font-bold rounded-lg transition-all ${tab === t.id
                 ? 'bg-white text-[var(--color-primary)] shadow-sm'
                 : 'text-slate-500 hover:text-slate-700'
-            }`}
+              }`}
           >
             {t.label}
           </button>

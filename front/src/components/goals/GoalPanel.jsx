@@ -47,6 +47,9 @@ export default function GoalPanel({ goal }) {
 
   const owner = goal?.ownerId || goal?.ownerStaffId;
   const responsible = goal?.responsibleId || goal?.responsibleStaffId;
+  const ownerId = owner?.id || owner;
+  const responsibleId = responsible?.id || responsible;
+  const canManage = isAdmin || ownerId === currentUser.id || responsibleId === currentUser.id;
 
   if (!goal) {
     return (
@@ -140,7 +143,7 @@ export default function GoalPanel({ goal }) {
             </div>
           </div>
 
-          {isAdmin && (
+          {canManage && (
             <div className="flex flex-wrap gap-2 lg:flex-col">
               <button
                 type="button"
@@ -182,9 +185,10 @@ export default function GoalPanel({ goal }) {
         <div className="flex-1 overflow-y-auto p-5 scrollbar-thin">
           <ActionList
             goalId={goal.id}
-            restrictUser={!isAdmin}
+            restrictUser={!canManage}
             currentUserId={currentUser.id}
-            hideAddButton={isAdmin}
+            hideAddButton={canManage}
+            canManage={canManage}
           />
         </div>
       </div>

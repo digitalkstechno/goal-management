@@ -67,9 +67,11 @@ function TaskRowInner({
 
   const assignedId = task.assignedUserId?.id || task.assignedUserId;
   const assignedStaffId = task.assignedStaffId?.id || task.assignedStaffId;
-  const canDelete = isAdmin || assignedId === currentUser.id;
-  const canNotes = isAdmin || assignedId === currentUser.id;
-  const canUpdateNumeric = isAdmin || assignedId === currentUser.id || assignedStaffId === currentUser.id;
+  const canManage = isAdmin || assignedId === currentUser.id || assignedStaffId === currentUser.id;
+  const canDelete = canManage;
+  const canEdit = canManage;
+  const canNotes = canManage;
+  const canUpdateNumeric = canManage;
   const [updatingProgress, setUpdatingProgress] = useState(false);
 
   const move = (dir) => {
@@ -337,14 +339,16 @@ function TaskRowInner({
             <Activity className="h-4 w-4" />
           </button>
 
-          <button
-            type="button"
-            onClick={() => setFormOpen(true)}
-            className="rounded border border-[var(--color-border)] p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-bg)] transition-colors"
-            aria-label="Edit task"
-          >
-            <Pencil className="h-4 w-4" />
-          </button>
+          {canEdit && (
+            <button
+              type="button"
+              onClick={() => setFormOpen(true)}
+              className="rounded border border-[var(--color-border)] p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-bg)] transition-colors"
+              aria-label="Edit task"
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
+          )}
 
           {canDelete ? (
             <button

@@ -107,6 +107,19 @@ const updateAction = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Action not found");
   }
 
+  // Permission check: admin OR owner OR assigned
+  const isAdmin = req.user.role === "admin";
+  const isOwner =
+    action.ownerId?.toString() === req.user._id.toString() ||
+    action.ownerStaffId?.toString() === req.user._id.toString();
+  const isAssigned =
+    action.assignedUserIds?.some((u) => u.toString() === req.user._id.toString()) ||
+    action.assignedStaffIds?.some((s) => s.toString() === req.user._id.toString());
+
+  if (!isAdmin && !isOwner && !isAssigned) {
+    throw new ApiError(403, "You don't have permission to update this action");
+  }
+
   // Check for date validity
   const newStartDate = startDate ? new Date(startDate) : action.startDate;
   const newDeadline = deadline ? new Date(deadline) : action.deadline;
@@ -150,6 +163,19 @@ const deleteAction = asyncHandler(async (req, res) => {
   const action = await Action.findById(id);
   if (!action) {
     throw new ApiError(404, "Action not found");
+  }
+
+  // Permission check: admin OR owner OR assigned
+  const isAdmin = req.user.role === "admin";
+  const isOwner =
+    action.ownerId?.toString() === req.user._id.toString() ||
+    action.ownerStaffId?.toString() === req.user._id.toString();
+  const isAssigned =
+    action.assignedUserIds?.some((u) => u.toString() === req.user._id.toString()) ||
+    action.assignedStaffIds?.some((s) => s.toString() === req.user._id.toString());
+
+  if (!isAdmin && !isOwner && !isAssigned) {
+    throw new ApiError(403, "You don't have permission to delete this action");
   }
 
   // Delete all tasks associated with this action

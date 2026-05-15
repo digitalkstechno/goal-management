@@ -20,7 +20,7 @@ export default function Header({ onOpenSidebar, onAddGoal }) {
             <Target className="h-6 w-6" />
           </div>
           <h1 className="hidden text-xl font-bold tracking-tight text-[var(--color-text)] sm:block lg:text-2xl">
-            GoaL
+            Goal Management
           </h1>
         </div>
       </div>
@@ -37,7 +37,7 @@ export default function Header({ onOpenSidebar, onAddGoal }) {
               {currentUser.role}
             </span>
           </div>
-          
+
           <div className="relative group">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl border-2 border-[var(--color-border)] bg-white text-[var(--color-primary)] transition-all group-hover:border-[var(--color-primary)] md:h-11 md:w-11">
               <UserCircle2 className="h-6 w-6" />

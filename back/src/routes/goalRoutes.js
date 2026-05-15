@@ -22,11 +22,11 @@ const buildGoalRoutes = (env) => {
   // POST /goals - Create a new goal (requires manage_goals permission)
   router.post("/", auth, requirePermissions("manage_goals"), createGoal);
 
-  // PUT /goals/:id - Update a goal (requires manage_goals permission)
-  router.put("/:id", auth, requirePermissions("manage_goals"), updateGoal);
+  // PUT /goals/:id - Update a goal
+  router.put("/:id", auth, updateGoal);
 
-  // DELETE /goals/:id - Delete a goal (requires manage_goals permission)
-  router.delete("/:id", auth, requirePermissions("manage_goals"), deleteGoal);
+  // DELETE /goals/:id - Delete a goal
+  router.delete("/:id", auth, deleteGoal);
 
   return router;
 };

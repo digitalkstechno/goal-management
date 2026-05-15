@@ -6,7 +6,7 @@ import ActionCard from './ActionCard';
 import ActionForm from './ActionForm';
 import EmptyState from '../common/EmptyState';
 
-export default function ActionList({ goalId, restrictUser, currentUserId, hideAddButton = false }) {
+export default function ActionList({ goalId, restrictUser, currentUserId, hideAddButton = false, canManage = false }) {
   const { actions, addAction } = useActions(goalId);
   const { isAdmin } = useAuth();
   const [open, setOpen] = useState(false);
@@ -17,13 +17,14 @@ export default function ActionList({ goalId, restrictUser, currentUserId, hideAd
       const oid = a.ownerId?.id || a.ownerId;
       if (oid === currentUserId) return true;
       const assignedIds = (a.assignedUserIds || []).map((u) => u.id || u);
-      return assignedIds.includes(currentUserId);
+      const assignedStaffIds = (a.assignedStaffIds || []).map((u) => u.id || u);
+      return assignedIds.includes(currentUserId) || assignedStaffIds.includes(currentUserId);
     });
   }, [actions, restrictUser, currentUserId]);
 
   return (
     <div className="space-y-4">
-      {isAdmin && !hideAddButton ? (
+      {(isAdmin || canManage) && !hideAddButton ? (
         <div className="flex justify-end">
           <button
             type="button"

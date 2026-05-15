@@ -112,6 +112,19 @@ const updateGoal = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Goal not found");
   }
 
+  // Permission check: admin OR owner OR responsible
+  const isAdmin = req.user.role === "admin";
+  const isOwner =
+    goal.ownerId?.toString() === req.user._id.toString() ||
+    goal.ownerStaffId?.toString() === req.user._id.toString();
+  const isResponsible =
+    goal.responsibleId?.toString() === req.user._id.toString() ||
+    goal.responsibleStaffId?.toString() === req.user._id.toString();
+
+  if (!isAdmin && !isOwner && !isResponsible) {
+    throw new ApiError(403, "You don't have permission to update this goal");
+  }
+
   // Check for date validity
   const newStartDate = startDate ? new Date(startDate) : goal.startDate;
   const newDeadline = deadline ? new Date(deadline) : goal.deadline;
@@ -161,6 +174,19 @@ const deleteGoal = asyncHandler(async (req, res) => {
   const goal = await Goal.findById(id);
   if (!goal) {
     throw new ApiError(404, "Goal not found");
+  }
+
+  // Permission check: admin OR owner OR responsible
+  const isAdmin = req.user.role === "admin";
+  const isOwner =
+    goal.ownerId?.toString() === req.user._id.toString() ||
+    goal.ownerStaffId?.toString() === req.user._id.toString();
+  const isResponsible =
+    goal.responsibleId?.toString() === req.user._id.toString() ||
+    goal.responsibleStaffId?.toString() === req.user._id.toString();
+
+  if (!isAdmin && !isOwner && !isResponsible) {
+    throw new ApiError(403, "You don't have permission to delete this goal");
   }
 
   // Find and delete all actions associated with this goal
