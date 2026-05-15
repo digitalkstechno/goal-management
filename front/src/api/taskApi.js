@@ -33,7 +33,7 @@ export async function reorderTasks(actionId, taskIds) {
 /** Persist task order for one action in real API. */
 export async function reorderTasksForAction(actionId, orderedIds) {
   const { data } = await axiosInstance.put(`/tasks/reorder`, { actionId, taskIds: orderedIds });
-  return data;
+  return data.data;
 }
 
 /** Update numeric task progress - increment, decrement, or set value */
