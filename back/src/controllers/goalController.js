@@ -24,6 +24,16 @@ const fetchGoals = asyncHandler(async (req, res) => {
     if (deadline) query.deadline.$lte = new Date(deadline);
   }
 
+  // Role-based restrictions: staff/managers only see assigned goals
+  if (req.user.role === "staff" || req.user.role === "manager") {
+    query.$or = [
+      { ownerId: req.user._id },
+      { ownerStaffId: req.user._id },
+      { responsibleId: req.user._id },
+      { responsibleStaffId: req.user._id },
+    ];
+  }
+
   const goals = await Goal.find(query)
     .populate("ownerId", "name email role")
     .populate("ownerStaffId", "name email role")
@@ -51,6 +61,21 @@ const fetchGoalById = asyncHandler(async (req, res) => {
 
   if (!goal) {
     throw new ApiError(404, "Goal not found");
+  }
+
+  // Role-based restrictions: staff/managers can only access their assigned goals
+  if (req.user.role === "staff" || req.user.role === "manager") {
+    const ownerIdStr = goal.ownerId?._id?.toString() || goal.ownerId?.toString();
+    const ownerStaffIdStr = goal.ownerStaffId?._id?.toString() || goal.ownerStaffId?.toString();
+    const responsibleIdStr = goal.responsibleId?._id?.toString() || goal.responsibleId?.toString();
+    const responsibleStaffIdStr = goal.responsibleStaffId?._id?.toString() || goal.responsibleStaffId?.toString();
+
+    const isOwner = ownerIdStr === req.user._id.toString() || ownerStaffIdStr === req.user._id.toString();
+    const isResponsible = responsibleIdStr === req.user._id.toString() || responsibleStaffIdStr === req.user._id.toString();
+
+    if (!isOwner && !isResponsible) {
+      throw new ApiError(403, "You don't have permission to access this goal");
+    }
   }
 
   res.status(200).json({

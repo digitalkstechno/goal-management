@@ -33,6 +33,14 @@ const fetchTasks = asyncHandler(async (req, res) => {
   if (priority) query.priority = priority;
   if (assignedUserId) query.assignedUserId = assignedUserId;
 
+  // Role-based restrictions: staff/managers only see assigned tasks
+  if (req.user.role === "staff" || req.user.role === "manager") {
+    query.$or = [
+      { assignedUserId: req.user._id },
+      { assignedStaffId: req.user._id },
+    ];
+  }
+
   const tasks = await Task.find(query)
     .populate("actionId", "name")
     .populate("assignedUserId", "name email role")
@@ -58,6 +66,16 @@ const fetchTaskById = asyncHandler(async (req, res) => {
 
   if (!task) {
     throw new ApiError(404, "Task not found");
+  }
+
+  // Role-based restrictions: staff/managers can only access their assigned tasks
+  if (req.user.role === "staff" || req.user.role === "manager") {
+    const assignedUserIdStr = task.assignedUserId?._id?.toString() || task.assignedUserId?.toString();
+    const assignedStaffIdStr = task.assignedStaffId?._id?.toString() || task.assignedStaffId?.toString();
+
+    if (assignedUserIdStr !== req.user._id.toString() && assignedStaffIdStr !== req.user._id.toString()) {
+      throw new ApiError(403, "You don't have permission to access this task");
+    }
   }
 
   res.status(200).json({
