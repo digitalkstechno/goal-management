@@ -69,6 +69,12 @@ const seedDatabase = async () => {
         password: "bob123",
         role: "user",
       },
+      {
+        name: "Bhavik Wala",
+        email: "bhavikwala@gmail.com",
+        password: "Bhavik@123",
+        role: "superAdmin",
+      },
     ]);
 
     console.log(`✓ Created ${users.length} users`);

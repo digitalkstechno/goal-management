@@ -3,6 +3,7 @@ const ROLES = {
   STAFF: "staff",
   MANAGER: "manager",
   USER: "user",
+  SUPER_ADMIN: "superAdmin",
 };
 
 const ROLE_PERMISSIONS = {
