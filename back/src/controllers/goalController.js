@@ -74,9 +74,56 @@ const fetchGoals = asyncHandler(async (req, res) => {
 
   console.log(`📊 Found ${goals.length} goals for user ${req.user._id}`);
 
+  // Fetch task counts for all goals
+  const goalIds = goals.map((g) => g._id);
+  const actions = await Action.find({ goalId: { $in: goalIds } }, "_id goalId");
+  const actionIds = actions.map((a) => a._id);
+
+  const taskCounts = await Task.aggregate([
+    { $match: { actionId: { $in: actionIds } } },
+    {
+      $lookup: {
+        from: "actions",
+        localField: "actionId",
+        foreignField: "_id",
+        as: "action",
+      },
+    },
+    { $unwind: "$action" },
+    {
+      $group: {
+        _id: "$action.goalId",
+        totalTasks: { $sum: 1 },
+        completedTasks: {
+          $sum: { $cond: [{ $eq: ["$status", "completed"] }, 1, 0] },
+        },
+      },
+    },
+  ]);
+
+  const taskCountMap = {};
+  taskCounts.forEach((t) => {
+    taskCountMap[t._id.toString()] = {
+      totalTasks: t.totalTasks,
+      completedTasks: t.completedTasks,
+    };
+  });
+
   res.status(200).json({
     success: true,
-    data: goals.map((goal) => (goal.toJSON ? goal.toJSON() : goal)),
+    data: goals.map((goal) => ({
+      ...(goal.toJSON ? goal.toJSON() : goal),
+      totalTasks: taskCountMap[goal._id.toString()]?.totalTasks ?? 0,
+      completedTasks: taskCountMap[goal._id.toString()]?.completedTasks ?? 0,
+      progressPercent:
+        taskCountMap[goal._id.toString()]?.totalTasks > 0
+          ? Math.round(
+              (taskCountMap[goal._id.toString()].completedTasks /
+                taskCountMap[goal._id.toString()].totalTasks) *
+                100
+            )
+          : 0,
+    })),
   });
 });
 
@@ -110,6 +157,68 @@ const fetchGoalById = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     data: goal,
+  });
+});
+
+// Fetch a single goal with all actions and their tasks
+const fetchGoalFull = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const goal = await Goal.findById(id)
+    .populate("ownerId", "name email role")
+    .populate("ownerStaffId", "name email role")
+    .populate("responsibleId", "name email role")
+    .populate("responsibleStaffId", "name email role")
+    .exec();
+
+  if (!goal) throw new ApiError(404, "Goal not found");
+
+  const scopedGoal = await Goal.exists(
+    combineQueries({ _id: id }, await buildGoalAccessQuery(req.user))
+  );
+  if (!scopedGoal) throw new ApiError(403, "You don't have permission to access this goal");
+
+  const actions = await Action.find({ goalId: id })
+    .populate("ownerId", "name email role")
+    .populate("ownerStaffId", "name email role")
+    .populate("assignedUserIds", "name email role")
+    .populate("assignedStaffIds", "name email role")
+    .sort({ createdAt: 1 })
+    .exec();
+
+  const actionIds = actions.map((a) => a._id);
+  const tasks = await Task.find({ actionId: { $in: actionIds } })
+    .populate("assignedUserId", "name email role")
+    .populate("assignedStaffId", "name email role")
+    .sort({ order: 1, createdAt: 1 })
+    .exec();
+
+  const tasksByAction = {};
+  tasks.forEach((task) => {
+    const key = task.actionId.toString();
+    if (!tasksByAction[key]) tasksByAction[key] = [];
+    tasksByAction[key].push(task.toJSON ? task.toJSON() : task);
+  });
+
+  const actionsWithTasks = actions.map((action) => ({
+    ...(action.toJSON ? action.toJSON() : action),
+    tasks: tasksByAction[action._id.toString()] ?? [],
+  }));
+
+  const totalTasks = tasks.length;
+  const completedTasks = tasks.filter((t) => t.status === "completed").length;
+  const progressPercent =
+    totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+  res.status(200).json({
+    success: true,
+    data: {
+      ...(goal.toJSON ? goal.toJSON() : goal),
+      totalTasks,
+      completedTasks,
+      progressPercent,
+      actions: actionsWithTasks,
+    },
   });
 });
 
@@ -321,6 +430,7 @@ const deleteGoal = asyncHandler(async (req, res) => {
 module.exports = {
   fetchGoals,
   fetchGoalById,
+  fetchGoalFull,
   createGoal,
   updateGoal,
   deleteGoal,

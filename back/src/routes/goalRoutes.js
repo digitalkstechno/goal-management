@@ -2,6 +2,7 @@ const express = require("express");
 const {
   fetchGoals,
   fetchGoalById,
+  fetchGoalFull,
   createGoal,
   updateGoal,
   deleteGoal,
@@ -15,6 +16,9 @@ const buildGoalRoutes = (env) => {
 
   // GET /goals - Fetch all goals (requires view_goals permission)
   router.get("/", auth, requirePermissions("view_goals"), fetchGoals);
+
+  // GET /goals/:id - Fetch goal with all actions and tasks
+  router.get("/:id", auth, requirePermissions("view_goals"), fetchGoalFull);
 
   // GET /goals/:id - Fetch a single goal (requires view_goals permission)
   router.get("/:id", auth, requirePermissions("view_goals"), fetchGoalById);
