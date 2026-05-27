@@ -133,7 +133,6 @@ export function AppProvider({ children }) {
   const addGoal = useCallback(async (payload) => {
     return await apiHandler(() => createGoal(payload), {
       successMsg: 'Goal created successfully',
-      errorMsg: 'Failed to create goal',
       onSuccess: (data) => dispatch({ type: 'ADD_GOAL', payload: data }),
     });
   }, []);
@@ -141,7 +140,6 @@ export function AppProvider({ children }) {
   const editGoal = useCallback(async (id, payload) => {
     return await apiHandler(() => updateGoal(id, payload), {
       successMsg: 'Goal updated',
-      errorMsg: 'Failed to update goal',
       onSuccess: (data) => dispatch({ type: 'UPDATE_GOAL', payload: data }),
     });
   }, []);
@@ -149,7 +147,6 @@ export function AppProvider({ children }) {
   const removeGoal = useCallback(async (id) => {
     return await apiHandler(() => deleteGoal(id), {
       successMsg: 'Goal deleted',
-      errorMsg: 'Failed to delete goal',
       onSuccess: async () => {
         dispatch({ type: 'DELETE_GOAL', payload: id });
         await Promise.all([loadActions(), loadTasks()]);
@@ -160,7 +157,6 @@ export function AppProvider({ children }) {
   const addAction = useCallback(async (payload) => {
     return await apiHandler(() => createAction(payload), {
       successMsg: 'Action created',
-      errorMsg: 'Failed to create action',
       onSuccess: (data) => dispatch({ type: 'ADD_ACTION', payload: data }),
     });
   }, []);
@@ -168,7 +164,6 @@ export function AppProvider({ children }) {
   const editAction = useCallback(async (id, payload) => {
     return await apiHandler(() => updateAction(id, payload), {
       successMsg: 'Action updated',
-      errorMsg: 'Failed to update action',
       onSuccess: (data) => dispatch({ type: 'UPDATE_ACTION', payload: data }),
     });
   }, []);
@@ -176,7 +171,6 @@ export function AppProvider({ children }) {
   const addActionUpdate = useCallback(async (id, payload) => {
     return await apiHandler(() => addActionUpdateApi(id, payload), {
       successMsg: 'Update added',
-      errorMsg: 'Failed to add update',
       onSuccess: (data) => dispatch({ type: 'UPDATE_ACTION', payload: data }),
     });
   }, []);
@@ -184,7 +178,6 @@ export function AppProvider({ children }) {
   const removeAction = useCallback(async (id) => {
     return await apiHandler(() => deleteAction(id), {
       successMsg: 'Action deleted',
-      errorMsg: 'Failed to delete action',
       onSuccess: async () => {
         dispatch({ type: 'DELETE_ACTION', payload: id });
         await loadTasks();
@@ -195,7 +188,6 @@ export function AppProvider({ children }) {
   const addTask = useCallback(async (payload) => {
     return await apiHandler(() => createTask(payload), {
       successMsg: 'Task created',
-      errorMsg: 'Failed to create task',
       onSuccess: (data) => dispatch({ type: 'ADD_TASK', payload: data }),
     });
   }, []);
@@ -203,7 +195,6 @@ export function AppProvider({ children }) {
   const editTask = useCallback(async (id, payload) => {
     return await apiHandler(() => updateTask(id, payload), {
       successMsg: 'Task updated',
-      errorMsg: 'Failed to update task',
       onSuccess: (data) => dispatch({ type: 'UPDATE_TASK', payload: data }),
     });
   }, []);
@@ -211,7 +202,6 @@ export function AppProvider({ children }) {
   const addTaskUpdate = useCallback(async (id, payload) => {
     return await apiHandler(() => addTaskUpdateApi(id, payload), {
       successMsg: 'Update added',
-      errorMsg: 'Failed to add update',
       onSuccess: (data) => dispatch({ type: 'UPDATE_TASK', payload: data }),
     });
   }, []);
@@ -223,7 +213,6 @@ export function AppProvider({ children }) {
   const removeTask = useCallback(async (id) => {
     return await apiHandler(() => deleteTask(id), {
       successMsg: 'Task deleted',
-      errorMsg: 'Failed to delete task',
       onSuccess: (data) => {
         void data;
         dispatch({ type: 'DELETE_TASK', payload: id });

@@ -2,7 +2,7 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
-const requiredEnv = ["PORT", "MONGO_URI", "JWT_SECRET", "JWT_EXPIRES_IN"];
+const requiredEnv = ["PORT", "MONGO_URI", "JWT_SECRET"];
 
 for (const key of requiredEnv) {
   if (!process.env[key]) {
@@ -15,7 +15,6 @@ const env = {
   port: Number(process.env.PORT) || 5000,
   mongoUri: process.env.MONGO_URI,
   jwtSecret: process.env.JWT_SECRET,
-  jwtExpiresIn: process.env.JWT_EXPIRES_IN,
   corsOrigin: "*",
 };
 

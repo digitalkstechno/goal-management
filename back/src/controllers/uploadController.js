@@ -35,13 +35,11 @@ exports.uploadAudio = (req, res) => {
     return res.status(400).json({ success: false, message: "No file uploaded" });
   }
 
-  // Generate the public URL. Assuming the server exposes /uploads statically
   const fileUrl = `/uploads/${req.file.filename}`;
 
-  res.status(200).json({
+  return res.status(200).json({
     success: true,
-    data: {
-      url: fileUrl,
-    },
+    message: "File uploaded successfully",
+    data: { url: fileUrl },
   });
 };

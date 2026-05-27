@@ -1,14 +1,12 @@
 const User = require("../models/User");
 const ApiError = require("../utils/ApiError");
+const { sendSuccess } = require("../utils/ApiError");
 const asyncHandler = require("../utils/asyncHandler");
 const { ROLES, getPermissionsByRole } = require("../utils/roles");
 
 const getAllUsers = asyncHandler(async (_req, res) => {
   const users = await User.find().select("-password -__v").sort({ createdAt: -1 });
-  res.status(200).json({
-    success: true,
-    data: users,
-  });
+  return sendSuccess(res, { message: "Users fetched successfully", data: users });
 });
 
 const updateUserRole = asyncHandler(async (req, res) => {
@@ -28,8 +26,8 @@ const updateUserRole = asyncHandler(async (req, res) => {
   user.permissions = getPermissionsByRole(role);
   await user.save();
 
-  res.status(200).json({
-    success: true,
+  return sendSuccess(res, {
+    message: "User role updated successfully",
     data: {
       id: user._id,
       name: user.name,

@@ -15,7 +15,10 @@ const protect = (jwtSecret) =>
     let decodedToken;
     try {
       decodedToken = jwt.verify(token, jwtSecret);
-    } catch {
+    } catch (err) {
+      if (err.name === "TokenExpiredError") {
+        throw new ApiError(401, "Session expired. Please login again.");
+      }
       throw new ApiError(401, "Unauthorized. Invalid token.");
     }
 

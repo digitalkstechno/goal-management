@@ -1,5 +1,7 @@
 const app = require("./app");
 const env = require("./config/env");
+require('node:dns').setServers(['1.1.1.1','8.8.8.8'])
+
 const connectDatabase = require("./config/db");
 
 const startServer = async () => {

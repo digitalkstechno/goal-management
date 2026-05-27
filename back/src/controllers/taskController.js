@@ -2,6 +2,7 @@ const Task = require("../models/Task");
 const Action = require("../models/Action");
 const Goal = require("../models/Goal");
 const ApiError = require("../utils/ApiError");
+const { sendSuccess } = require("../utils/ApiError");
 const asyncHandler = require("../utils/asyncHandler");
 const mongoose = require("mongoose");
 const {
@@ -90,10 +91,7 @@ const fetchTasks = asyncHandler(async (req, res) => {
 
   console.log(`📊 Found ${tasks.length} tasks for user ${req.user._id}`);
 
-  res.status(200).json({
-    success: true,
-    data: tasks.map(t => t.toJSON ? t.toJSON() : t),
-  });
+  return sendSuccess(res, { message: "Tasks fetched successfully", data: tasks.map(t => t.toJSON ? t.toJSON() : t) });
 });
 
 // Fetch a single task by ID
@@ -120,10 +118,7 @@ const fetchTaskById = asyncHandler(async (req, res) => {
     throw new ApiError(403, "You don't have permission to access this task");
   }
 
-  res.status(200).json({
-    success: true,
-    data: task.toJSON ? task.toJSON() : task,
-  });
+  return sendSuccess(res, { message: "Task fetched successfully", data: task.toJSON ? task.toJSON() : task });
 });
 
 // Create a new task
@@ -263,10 +258,7 @@ const createTask = asyncHandler(async (req, res) => {
     { path: "assignedStaffId", select: "name email role" },
   ]);
 
-  res.status(201).json({
-    success: true,
-    data: populatedTask.toJSON ? populatedTask.toJSON() : populatedTask,
-  });
+  return sendSuccess(res, { statusCode: 201, message: "Task created successfully", data: populatedTask.toJSON ? populatedTask.toJSON() : populatedTask });
 });
 
 // Update a task
@@ -409,10 +401,7 @@ const updateTask = asyncHandler(async (req, res) => {
     { path: "assignedStaffId", select: "name email role" },
   ]);
 
-  res.status(200).json({
-    success: true,
-    data: populatedTask.toJSON ? populatedTask.toJSON() : populatedTask,
-  });
+  return sendSuccess(res, { message: "Task updated successfully", data: populatedTask.toJSON ? populatedTask.toJSON() : populatedTask });
 });
 
 // Delete a task
@@ -436,10 +425,7 @@ const deleteTask = asyncHandler(async (req, res) => {
 
   await Task.findByIdAndDelete(id);
 
-  res.status(200).json({
-    success: true,
-    message: "Task deleted successfully",
-  });
+  return sendSuccess(res, { message: "Task deleted successfully" });
 });
 
 // Reorder tasks within an action
@@ -474,10 +460,7 @@ const reorderTasks = asyncHandler(async (req, res) => {
 
   const updatedTasks = await Promise.all(updatePromises);
 
-  res.status(200).json({
-    success: true,
-    data: updatedTasks,
-  });
+  return sendSuccess(res, { message: "Tasks reordered successfully", data: updatedTasks });
 });
 
 // Update numeric task progress
@@ -539,10 +522,7 @@ const updateNumericProgress = asyncHandler(async (req, res) => {
     { path: "assignedStaffId", select: "name email" },
   ]);
 
-  res.status(200).json({
-    success: true,
-    data: updatedTask.toJSON ? updatedTask.toJSON() : updatedTask,
-  });
+  return sendSuccess(res, { message: "Progress updated successfully", data: updatedTask.toJSON ? updatedTask.toJSON() : updatedTask });
 });
 
 // Add an update to a task
@@ -588,10 +568,7 @@ const addTaskUpdate = asyncHandler(async (req, res) => {
     { path: "updates.assignedStaffId", select: "name email role" },
   ]);
 
-  res.status(201).json({
-    success: true,
-    data: populatedTask.toJSON ? populatedTask.toJSON() : populatedTask,
-  });
+  return sendSuccess(res, { statusCode: 201, message: "Task update added successfully", data: populatedTask.toJSON ? populatedTask.toJSON() : populatedTask });
 });
 
 module.exports = {

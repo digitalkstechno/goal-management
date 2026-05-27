@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Staff = require("../models/Staff");
 const ApiError = require("../utils/ApiError");
+const { sendSuccess } = require("../utils/ApiError");
 const asyncHandler = require("../utils/asyncHandler");
 const { ROLES, getPermissionsByRole } = require("../utils/roles");
 
@@ -52,11 +53,7 @@ const createStaff = asyncHandler(async (req, res) => {
     permissions: getPermissionsByRole(role),
   });
 
-  res.status(201).json({
-    success: true,
-    message: "Staff created successfully",
-    data: staff.toJSON(),
-  });
+  return sendSuccess(res, { statusCode: 201, message: "Staff created successfully", data: staff.toJSON() });
 });
 
 /**
@@ -93,17 +90,9 @@ const getStaff = asyncHandler(async (req, res) => {
 
   const staff = staffDocs.map((doc) => doc.toJSON());
 
-  res.status(200).json({
-    success: true,
-    data: {
-      staff,
-      pagination: {
-        total,
-        page: pageNum,
-        limit: pageSize,
-        pages: Math.ceil(total / pageSize),
-      },
-    },
+  return sendSuccess(res, {
+    message: "Staff fetched successfully",
+    data: { staff, pagination: { total, page: pageNum, limit: pageSize, pages: Math.ceil(total / pageSize) } },
   });
 });
 
@@ -124,10 +113,7 @@ const getStaffById = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Staff not found.");
   }
 
-  res.status(200).json({
-    success: true,
-    data: staff.toJSON(),
-  });
+  return sendSuccess(res, { message: "Staff fetched successfully", data: staff.toJSON() });
 });
 
 /**
@@ -162,11 +148,7 @@ const updateStaff = asyncHandler(async (req, res) => {
 
   await staff.save();
 
-  res.status(200).json({
-    success: true,
-    message: "Staff updated successfully",
-    data: staff.toJSON(),
-  });
+  return sendSuccess(res, { message: "Staff updated successfully", data: staff.toJSON() });
 });
 
 /**
@@ -198,11 +180,7 @@ const assignRole = asyncHandler(async (req, res) => {
 
   await staff.save();
 
-  res.status(200).json({
-    success: true,
-    message: `Role assigned successfully`,
-    data: staff.toJSON(),
-  });
+  return sendSuccess(res, { message: `Role assigned to ${staff.name} successfully`, data: staff.toJSON() });
 });
 
 /**
@@ -221,10 +199,7 @@ const deleteStaff = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Staff not found.");
   }
 
-  res.status(200).json({
-    success: true,
-    message: "Staff deleted successfully",
-  });
+  return sendSuccess(res, { message: "Staff deleted successfully" });
 });
 
 /**
@@ -246,8 +221,7 @@ const toggleStaffStatus = asyncHandler(async (req, res) => {
   staff.isActive = !staff.isActive;
   await staff.save();
 
-  res.status(200).json({
-    success: true,
+  return sendSuccess(res, {
     message: `Staff ${staff.isActive ? "activated" : "deactivated"} successfully`,
     data: staff.toJSON(),
   });
